@@ -23,14 +23,6 @@ export const metadata: Metadata = {
     description: siteConfig.description,
     url: siteConfig.url,
     siteName: siteConfig.name,
-    images: [
-      {
-        url: siteConfig.ogImage,
-        width: 1200,
-        height: 630,
-        alt: siteConfig.name,
-      },
-    ],
     type: "website",
   },
 };
@@ -96,7 +88,7 @@ export default async function Home() {
               </Link>
             </div>
           </div>
-          <Smiley className="absolute -right-3 -bottom-6 size-16 rotate-12 rounded-full bg-blush p-1 shadow-md md:-top-6 md:-right-4 md:bottom-auto" />
+          <Smiley className="absolute -top-6 -right-3 z-20 size-16 rotate-12 rounded-full bg-blush p-1 shadow-md md:-right-4" />
         </div>
 
         <div className="relative md:pt-2">

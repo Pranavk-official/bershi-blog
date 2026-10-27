@@ -9,6 +9,7 @@ import {
 } from "next/font/google";
 import "./globals.css";
 import { BottomNav, SiteHeader } from "@/components/shared/SiteHeader";
+import { FaviconBlink } from "@/components/shared/FaviconBlink";
 import { SiteFooter } from "@/components/shared/SiteFooter";
 import { Snow } from "@/components/ui/snow";
 import { isChristmasSeason } from "@/lib/utils/dateHelpers";
@@ -82,20 +83,11 @@ export const metadata: Metadata = {
     title: siteConfig.name,
     description: siteConfig.description,
     siteName: siteConfig.name,
-    images: [
-      {
-        url: siteConfig.ogImage,
-        width: 1200,
-        height: 630,
-        alt: siteConfig.name,
-      },
-    ],
   },
   twitter: {
     card: "summary_large_image",
     title: siteConfig.name,
     description: siteConfig.description,
-    images: [siteConfig.ogImage],
     creator: "@Arch_Lad_",
   },
   icons: {
@@ -131,15 +123,16 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${patrickHand.variable} ${jetbrainsMono.variable} ${outfit.variable} ${courierPrime.variable} antialiased max-md:pb-[calc(4.75rem+env(safe-area-inset-bottom))]`}
+        className={`${geistSans.variable} ${geistMono.variable} ${patrickHand.variable} ${jetbrainsMono.variable} ${outfit.variable} ${courierPrime.variable} flex min-h-svh flex-col antialiased max-md:pb-[calc(4.75rem+env(safe-area-inset-bottom))]`}
       >
         {/* Christmas Snow Animation - Only visible during Christmas season */}
         {isChristmasSeason() && <Snow />}
 
         <SiteHeader />
-        <main className="overflow-x-clip">{children}</main>
+        <main className="flex-1 overflow-x-clip">{children}</main>
         <SiteFooter />
         <BottomNav />
+        <FaviconBlink />
       </body>
     </html>
   );

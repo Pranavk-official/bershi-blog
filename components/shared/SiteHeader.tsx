@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 
 import { siteConfig } from "@config/site";
 import { cn } from "@lib/utils";
@@ -103,14 +104,34 @@ export function SiteHeader() {
   );
 }
 
-/** Phone tab bar: a paper strip torn along its top edge, pinned above the home indicator. */
+/**
+ * Phone tab bar: a paper strip torn along its top edge, pinned above the home
+ * indicator. On the home page it waits below the screen until the hero has
+ * scrolled away.
+ */
 export function BottomNav() {
   const isActive = useIsActive();
+  const pathname = usePathname();
+  const [heroInView, setHeroInView] = useState(true);
+
+  useEffect(() => {
+    const hero = document.querySelector('[aria-labelledby="hero-heading"]');
+    if (!hero) return;
+    const io = new IntersectionObserver(([entry]) => setHeroInView(entry.isIntersecting));
+    io.observe(hero);
+    return () => io.disconnect();
+  }, [pathname]);
+
+  const hidden = pathname === "/" && heroInView;
 
   return (
     <nav
       aria-label="Primary"
-      className="fixed inset-x-0 bottom-0 z-40 drop-shadow-[0_-2px_3px_rgb(60_45_25/0.16)] md:hidden"
+      inert={hidden}
+      className={cn(
+        "fixed inset-x-0 bottom-0 z-40 drop-shadow-[0_-2px_3px_rgb(60_45_25/0.16)] transition-transform duration-300 ease-out motion-reduce:transition-none md:hidden",
+        hidden && "translate-y-full",
+      )}
     >
       <ul
         className="grid grid-cols-5 bg-card px-1 pt-2.5 pb-[max(env(safe-area-inset-bottom),0.25rem)]"
