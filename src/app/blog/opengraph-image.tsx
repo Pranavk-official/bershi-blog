@@ -7,9 +7,9 @@ export const contentType = "image/png";
 
 export default function Image() {
   return ogCard({
-    kicker: siteConfig.name,
     title: "Notes",
-    subtitle: "On code, craft and the web.",
+    subtitle: "On code, craft and the web, by Pranav K.",
     print: { src: "profile_.png" },
+    list: { heading: "On here:", items: ["Notes", "Art", "About"], active: "Notes" },
   });
 }

@@ -7,9 +7,9 @@ export const contentType = "image/png";
 
 export default function Image() {
   return ogCard({
-    // No-break space keeps the name on one line.
-    title: `Hi, I'm ${siteConfig.name.replace(/ /g, "\u00a0")}.`,
+    title: `Hi, I'm\n${siteConfig.name}.`,
     subtitle: siteConfig.tagline,
     print: { src: "profile_.png" },
+    list: { heading: "On here:", items: ["Notes", "Art", "About"] },
   });
 }

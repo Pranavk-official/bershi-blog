@@ -16,11 +16,11 @@ export default async function Image({ params }: { params: Promise<{ slug: string
     console.error("Error fetching post metadata for OG image:", error);
   }
 
-  if (!post) return ogCard({ kicker: siteConfig.name, title: "Notes" });
+  if (!post) return ogCard({ title: "Notes", subtitle: `By ${siteConfig.name}` });
 
   return ogCard({
-    kicker: post.tags?.length ? post.tags.map((t) => `#${t}`).join("  ") : `Notes — ${siteConfig.name}`,
     title: post.title,
     subtitle: post.description,
+    list: post.tags?.length ? { heading: "Tagged:", items: post.tags.slice(0, 4) } : undefined,
   });
 }

@@ -9,4 +9,4 @@ Disallow: /test/
 Disallow: /blog-test/
 
 # Sitemap location
-Sitemap: https://pranavk.site/sitemap.xml
+Sitemap: https://bershi-blog.vercel.app/sitemap.xml

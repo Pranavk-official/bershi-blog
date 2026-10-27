@@ -36,7 +36,7 @@ HOSTINGER_MAIL_TOKEN=bearer_token
 HOSTINGER_MAILBOX_ID=mailbox_resource_id
 ```
 
-When `NEXT_PUBLIC_SITE_URL` is unset, `getBaseUrl()` falls back to the production domain `https://pranavk.site` (hardcoded in both `config/site.ts` and `src/config/site.ts`, and in `public/robots.txt`'s `Sitemap:` line).
+When `NEXT_PUBLIC_SITE_URL` is unset, `getBaseUrl()` falls back to the production domain `https://bershi-blog.vercel.app` (hardcoded in both `config/site.ts` and `src/config/site.ts`, and in `public/robots.txt`'s `Sitemap:` line).
 
 When `NOTION_TOKEN` / `NOTION_DATA_SOURCE_ID` are missing, `lib/notion.ts` silently returns empty results — pages render but the blog list is empty. Never throw on missing creds.
 

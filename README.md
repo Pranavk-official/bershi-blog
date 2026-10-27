@@ -2,7 +2,7 @@
 
 A modern, performant personal portfolio built with **Next.js 16**, **React 19**, and **TypeScript**. Features animated UI components, a Notion-powered blog, 3D graphics, and full SEO support.
 
-🌐 **Live site:** [pranavk.site](https://pranavk.site)
+🌐 **Live site:** [bershi-blog.vercel.app](https://bershi-blog.vercel.app)
 
 ---
 
@@ -148,7 +148,7 @@ The build script sets `NODE_OPTIONS=--max-old-space-size=8192` to handle large d
 
 1. Import the repository on [Vercel](https://vercel.com/new).
 2. Add the following environment variables in **Project Settings → Environment Variables**:
-   - `NEXT_PUBLIC_SITE_URL` — your production domain (e.g. `https://pranavk.site`)
+   - `NEXT_PUBLIC_SITE_URL` — your production domain (e.g. `https://bershi-blog.vercel.app`)
    - `NOTION_TOKEN` — your Notion integration secret
    - `NOTION_DATA_SOURCE_ID` — your Notion database ID
 3. Deploy — Vercel handles the rest automatically.

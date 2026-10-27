@@ -7,9 +7,8 @@ export const contentType = "image/png";
 
 export default function Image() {
   return ogCard({
-    kicker: siteConfig.name,
     title: "Art",
-    subtitle: "Original artwork. Desktop and mobile wallpapers, free for personal use.",
+    subtitle: "Original artwork and free wallpapers by Pranav K.",
     print: { src: "wallpapers/16x9/Goblin_16x9_1.png", wide: true, zoom: 2.2 },
   });
 }
