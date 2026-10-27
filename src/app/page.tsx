@@ -60,6 +60,8 @@ export default async function Home() {
               priority
               className="aspect-square w-full object-cover"
             />
+            {/* Sticker on the photo's corner, where it meets the note. */}
+            <Smiley className="absolute -right-5 -bottom-5 size-16 -rotate-6 rounded-full bg-blush p-1 shadow-md" />
           </div>
           <div className="torn bg-kraft px-8 pt-12 pb-10 text-foreground max-md:pt-24 sm:px-10">
             <h1
@@ -88,7 +90,7 @@ export default async function Home() {
               </Link>
             </div>
           </div>
-          <Smiley className="absolute -top-6 -right-3 z-20 size-16 rotate-12 rounded-full bg-blush p-1 shadow-md md:-right-4" />
+          <Smiley className="absolute -top-6 -right-4 size-16 rotate-12 rounded-full bg-blush p-1 shadow-md max-md:hidden" />
         </div>
 
         <div className="relative md:pt-2">
@@ -117,7 +119,8 @@ export default async function Home() {
 
         <div className="relative md:mt-16">
           <Star className="absolute -top-14 left-1/2 hidden md:block" />
-          <div className="lined rotate-3 px-6 pt-5 pb-8 font-hand text-xl shadow-md">
+          {/* BottomNav pops up as this card comes onto the screen. */}
+          <div data-bottom-nav-from className="lined rotate-3 px-6 pt-5 pb-8 font-hand text-xl shadow-md">
             <p className="text-2xl underline underline-offset-4">Elsewhere:</p>
             <ul className="mt-2 space-y-[0.2rem]">
               {elsewhere.map((item) => (

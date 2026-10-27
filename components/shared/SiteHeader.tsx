@@ -106,23 +106,29 @@ export function SiteHeader() {
 
 /**
  * Phone tab bar: a paper strip torn along its top edge, pinned above the home
- * indicator. On the home page it waits below the screen until the hero has
- * scrolled away.
+ * indicator. On the home page it waits below the screen until the
+ * "Elsewhere" card (marked `data-bottom-nav-from`) starts coming into view.
  */
 export function BottomNav() {
   const isActive = useIsActive();
   const pathname = usePathname();
-  const [heroInView, setHeroInView] = useState(true);
+  const [waiting, setWaiting] = useState(true);
 
   useEffect(() => {
-    const hero = document.querySelector('[aria-labelledby="hero-heading"]');
-    if (!hero) return;
-    const io = new IntersectionObserver(([entry]) => setHeroInView(entry.isIntersecting));
-    io.observe(hero);
+    const marker = document.querySelector("[data-bottom-nav-from]");
+    if (!marker) return;
+    // The root reaches far above the screen, so "intersecting" means the
+    // marker is on screen or already scrolled past; even a jump that skips
+    // over it flips the state.
+    const io = new IntersectionObserver(([entry]) => setWaiting(!entry.isIntersecting), {
+      rootMargin: "100000px 0px 0px 0px",
+    });
+    io.observe(marker);
     return () => io.disconnect();
   }, [pathname]);
 
-  const hidden = pathname === "/" && heroInView;
+  // Only the home page has a marker; elsewhere the bar is always up.
+  const hidden = pathname === "/" && waiting;
 
   return (
     <nav
