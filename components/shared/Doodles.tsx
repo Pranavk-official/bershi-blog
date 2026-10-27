@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
 import { cn } from "@lib/utils";
 
 // Hand-drawn ink doodles for the scrapbook layout. Decorative only.
@@ -27,11 +30,51 @@ export function Star({ className }: DoodleProps) {
   );
 }
 
+// One blink each time the pointer comes over the face. Kept with the
+// component so it doesn't depend on the global stylesheet.
+const blinkCss = `
+@keyframes smiley-blink { 0%, 100% { scale: 1 1 } 45%, 55% { scale: 1 0.1 } }
+.smiley .smiley-eyes path { transform-box: fill-box; transform-origin: center }
+.smiley:hover .smiley-eyes path { animation: smiley-blink 0.26s ease-in-out }
+@media (prefers-reduced-motion: reduce) { .smiley:hover .smiley-eyes path { animation: none } }
+`;
+
+/**
+ * Blinks on hover; winks when clicked or tapped. Purely playful, so it stays
+ * out of the accessibility tree and off the tab order.
+ */
 export function Smiley({ className }: DoodleProps) {
+  const [wink, setWink] = useState(false);
+  const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  const onPointerDown = () => {
+    clearTimeout(timer.current);
+    setWink(true);
+    timer.current = setTimeout(() => setWink(false), 700);
+  };
+
+  useEffect(() => () => clearTimeout(timer.current), []);
+
   return (
-    <svg viewBox="0 0 48 48" aria-hidden="true" className={cn("size-12", className)}>
+    <svg
+      viewBox="0 0 48 48"
+      aria-hidden="true"
+      onPointerDown={onPointerDown}
+      className={cn(
+        "smiley size-12 cursor-pointer touch-manipulation transition-transform duration-300 ease-out select-none",
+        "motion-reduce:transform-none!",
+        className,
+      )}
+      // `transform`, not the rotate utility, so it stacks on a rotate the caller sets.
+      style={wink ? { transform: "rotate(-10deg) scale(1.1)" } : undefined}
+    >
+      <style>{blinkCss}</style>
       <circle {...ink} cx="24" cy="24" r="21" />
-      <path {...ink} d="M17 18v4M31 18v4M14 29c5 7 15 7 20 0" />
+      <g className="smiley-eyes">
+        <path {...ink} d="M17 18v4" />
+        {wink ? <path {...ink} d="M28 21.5q3-3.5 6 0" /> : <path {...ink} d="M31 18v4" />}
+      </g>
+      <path {...ink} d={wink ? "M13 28c5 9 17 9 22 0" : "M14 29c5 7 15 7 20 0"} />
     </svg>
   );
 }

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import {
   Geist,
   Geist_Mono,
@@ -8,8 +8,7 @@ import {
   Patrick_Hand,
 } from "next/font/google";
 import "./globals.css";
-import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler";
-import { SiteHeader } from "@/components/shared/SiteHeader";
+import { BottomNav, SiteHeader } from "@/components/shared/SiteHeader";
 import { SiteFooter } from "@/components/shared/SiteFooter";
 import { Snow } from "@/components/ui/snow";
 import { isChristmasSeason } from "@/lib/utils/dateHelpers";
@@ -57,6 +56,9 @@ const courierPrime = Courier_Prime({
   variable: "--font-courier-prime",
   display: "swap",
 });
+
+// viewport-fit=cover so the mobile app bar can pad itself under the notch.
+export const viewport: Viewport = { viewportFit: "cover" };
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
@@ -129,19 +131,15 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${patrickHand.variable} ${jetbrainsMono.variable} ${outfit.variable} ${courierPrime.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${patrickHand.variable} ${jetbrainsMono.variable} ${outfit.variable} ${courierPrime.variable} antialiased max-md:pb-[calc(4.75rem+env(safe-area-inset-bottom))]`}
       >
-        {/* Theme Toggler */}
-        <div className="fixed top-6 right-6 z-50">
-          <AnimatedThemeToggler />
-        </div>
-
         {/* Christmas Snow Animation - Only visible during Christmas season */}
         {isChristmasSeason() && <Snow />}
 
         <SiteHeader />
-        <main>{children}</main>
+        <main className="overflow-x-clip">{children}</main>
         <SiteFooter />
+        <BottomNav />
       </body>
     </html>
   );

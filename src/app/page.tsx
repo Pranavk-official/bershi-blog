@@ -58,11 +58,25 @@ export default async function Home() {
         <Flower className="hidden self-center md:block" />
 
         <div className="tape relative mt-4 -rotate-1">
-          <div className="torn bg-kraft px-8 pt-12 pb-10 text-foreground sm:px-10">
-            <h1 id="hero-heading" className="text-5xl leading-[1.05] sm:text-6xl">
+          {/* Phones: the photo is taped on and overlaps the note, right above the name. */}
+          <div className="relative z-10 mx-auto -mb-16 w-[72%] rotate-[3deg] bg-white p-2.5 pb-10 shadow-lg md:hidden dark:bg-ash-200">
+            <Image
+              src="/profile_.png"
+              alt={siteConfig.name}
+              width={560}
+              height={560}
+              priority
+              className="aspect-square w-full object-cover"
+            />
+          </div>
+          <div className="torn bg-kraft px-8 pt-12 pb-10 text-foreground max-md:pt-24 sm:px-10">
+            <h1
+              id="hero-heading"
+              className="text-[clamp(2.5rem,12vw,3rem)] leading-[1.05] sm:text-6xl"
+            >
               Hi, I&apos;m
               <br />
-              {siteConfig.name}.
+              <span className="whitespace-nowrap">{siteConfig.name}.</span>
             </h1>
             <Squiggle className="mt-2 w-40" />
             <p className="mt-6 max-w-xs text-sm leading-relaxed">
@@ -82,11 +96,11 @@ export default async function Home() {
               </Link>
             </div>
           </div>
-          <Smiley className="absolute -top-6 -right-4 size-16 rotate-12 rounded-full bg-blush p-1 shadow-md" />
+          <Smiley className="absolute -right-3 -bottom-6 size-16 rotate-12 rounded-full bg-blush p-1 shadow-md md:-top-6 md:-right-4 md:bottom-auto" />
         </div>
 
         <div className="relative md:pt-2">
-          <div className="tape relative rotate-2 bg-white p-3 pb-10 shadow-lg dark:bg-ash-200">
+          <div className="tape relative rotate-2 bg-white p-3 pb-10 shadow-lg max-md:hidden dark:bg-ash-200">
             <Image
               src="/profile_.png"
               alt={siteConfig.name}
@@ -99,7 +113,7 @@ export default async function Home() {
           {latest && (
             <Link
               href={`/blog/${latest.slug}`}
-              className="relative -mt-6 ml-6 block w-fit max-w-[16rem] -rotate-2 bg-sage px-5 py-3 text-sm shadow-md"
+              className="relative ml-6 block md:-mt-6 w-fit max-w-[16rem] -rotate-2 bg-sage px-5 py-3 text-sm shadow-md"
             >
               <span className="block text-xs uppercase tracking-wide text-muted-foreground">
                 Just posted

@@ -47,15 +47,16 @@ const spreadPages: Page[] = spreads.flatMap((plates, i): Page[] =>
 
 // `page` is the page size; the open spread is two pages side by side. `fit`
 // sizes the book's wrapper so the whole spread fits the viewport. Phones get
-// taller pages so the open book is as large as a narrow screen allows.
+// taller pages so the open book is as large as a narrow screen allows. On short
+// screens the height term goes negative, so the book keeps a floor width.
 const layouts = {
   spread: {
     page: { width: 600, height: 520 },
-    fit: `min(100%, 900px, (100svh - 24rem) * ${1200 / 520})`,
+    fit: `max(min(100%, 20rem), min(100%, 900px, (100svh - 24rem) * ${1200 / 520}))`,
   },
   phone: {
     page: { width: 360, height: 500 },
-    fit: `min(100%, (100svh - 22rem) * ${720 / 500})`,
+    fit: `max(min(100%, 20rem), min(100%, (100svh - 22rem) * ${720 / 500}))`,
   },
 };
 
@@ -72,6 +73,8 @@ const imageUrl = (w: Wallpaper, width: number) =>
 // filters: page-flip re-clips pages every frame, so paint must stay cheap.
 const PAPER = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .42 0 0 0 0 .36 0 0 0 0 .27 0 0 0 .22 0'/%3E%3C/filter%3E%3Cfilter id='t'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.035' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .43 0 0 0 0 .32 0 0 0 .18 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23t)'/%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E")`;
 
+const PAPER_INK = "#f8f3ea";
+
 /** One sheet of paper. */
 function Sheet({ page, width, layer = true }: { page: Page; width: number; layer?: boolean }) {
   const { art, side } = page;
@@ -85,6 +88,7 @@ function Sheet({ page, width, layer = true }: { page: Page; width: number; layer
         // nested layer defeats backface-visibility in Chrome.
         layer && "transform-gpu",
         left ? "rounded-l-[10px]" : "rounded-r-[10px]",
+        "@container",
       )}
     >
       {art?.fit === "half" && (
@@ -114,6 +118,33 @@ function Sheet({ page, width, layer = true }: { page: Page; width: number; layer
           style={{ backgroundImage: `url(${imageUrl(art.plate, width)})` }}
         />
       )}
+      {/* Folio: a seal pressed at the outer foot of the page. */}
+      <svg
+        viewBox="0 0 100 100"
+        aria-label={`Page ${spreadPages.indexOf(page) + 1}`}
+        role="img"
+        className={cn(
+          "absolute bottom-[4%] w-[max(22px,10cqw)] font-hand opacity-85",
+          left ? "left-[6%] -rotate-3" : "right-[6%] rotate-2",
+        )}
+      >
+        <path
+          fill="#7a4a2e"
+          d="M7 10Q5 5 11 5L47 4Q51 6 56 4L89 5Q95 5 95 11L96 49Q94 54 96 58L95 89Q95 95 89 95L53 96Q48 94 43 96L11 95Q5 95 5 89L4 53Q6 48 4 43Z"
+        />
+        <rect x="10" y="10" width="80" height="80" rx="2" fill="none" stroke={PAPER_INK} strokeWidth="4" />
+        <text x="50" y="54" fill={PAPER_INK} fontSize="68" textAnchor="middle" dominantBaseline="central">
+          {spreadPages.indexOf(page) + 1}
+        </text>
+        {/* Worn spots where the ink didn't take. */}
+        <g fill={PAPER_INK}>
+          <circle cx="24" cy="80" r="2.2" />
+          <circle cx="79" cy="20" r="1.6" />
+          <circle cx="70" cy="84" r="1.2" />
+          <circle cx="8" cy="30" r="1.4" />
+          <path d="M93 66q-3 3-1 7l3-1z" />
+        </g>
+      </svg>
       {/* Paper tooth over everything, so the art reads as printed on it. */}
       <div
         aria-hidden="true"
@@ -290,7 +321,8 @@ export function ArtBook() {
   const [phone, setPhone] = useState<boolean | null>(null);
 
   useEffect(() => {
-    const query = window.matchMedia("(max-width: 640px)");
+    // Landscape phones too: wide but short, and page-flip stutters on phones.
+    const query = window.matchMedia("(max-width: 640px), (pointer: coarse) and (max-height: 500px)");
     const sync = () => setPhone(query.matches);
     sync();
     query.addEventListener("change", sync);
@@ -346,19 +378,16 @@ export function ArtBook() {
 
   // `current` is a page index on desktop (page-flip) and a spread on phones.
   const plates = (phone ? leftOf(current) : spreadPages[current])?.plates ?? [];
+  const firstPage = (phone ? current * 2 : current - (current % 2)) + 1;
 
   return (
     <div className="flex min-h-[calc(100svh-7rem)] flex-col items-center justify-center pb-8">
-      <p className="text-center text-[10.5px] tracking-[0.3em] text-muted-foreground uppercase sm:text-xs">
-        Original artwork / Desktop &amp; mobile wallpapers / Free for personal use
-      </p>
-
-      <div className="mt-8 flex w-full items-center justify-center gap-2 sm:mt-10 sm:gap-6">
+      <div className="flex w-full items-center justify-center gap-2 sm:mt-10 sm:gap-6">
         <button
           type="button"
           aria-label="Previous page"
           onClick={() => book.current?.flipPrev()}
-          className="relative z-10 shrink-0 text-muted-foreground/60 transition-colors hover:text-foreground max-sm:hidden"
+          className={cn("relative z-10 shrink-0 text-muted-foreground/60 transition-colors hover:text-foreground", phone && "hidden")}
         >
           <ChevronLeft className="size-9" strokeWidth={0.8} />
         </button>
@@ -391,13 +420,16 @@ export function ArtBook() {
           type="button"
           aria-label="Next page"
           onClick={() => book.current?.flipNext()}
-          className="relative z-10 shrink-0 text-muted-foreground/60 transition-colors hover:text-foreground max-sm:hidden"
+          className={cn("relative z-10 shrink-0 text-muted-foreground/60 transition-colors hover:text-foreground", phone && "hidden")}
         >
           <ChevronRight className="size-9" strokeWidth={0.8} />
         </button>
       </div>
 
-      <p aria-live="polite" className="mt-8 min-h-5 text-center text-[13px] tracking-[0.3em] uppercase">
+      <p className="mt-4 text-center text-[11px] tracking-[0.3em] text-muted-foreground uppercase">
+        Pages {firstPage}–{firstPage + 1} of {spreadPages.length}
+      </p>
+      <p aria-live="polite" className="mt-3 min-h-5 text-center text-[13px] tracking-[0.3em] uppercase">
         {plates.map((p) => p.title).join(" / ")}
       </p>
       <p className="mt-1 flex min-h-4 gap-4 text-xs text-muted-foreground">
@@ -433,8 +465,7 @@ export function ArtBook() {
       </div>
 
       <p className="mt-4 text-center text-[11px] tracking-[0.3em] text-muted-foreground uppercase">
-        <span className="sm:hidden">Swipe or tap the page edge to turn</span>
-        <span className="max-sm:hidden">Drag the page to turn</span>
+        {phone ? "Swipe or tap the page edge to turn" : "Drag the page to turn"}
       </p>
       <p className="mt-6 text-center text-xs text-muted-foreground">
         Book inspired by{" "}
@@ -446,6 +477,9 @@ export function ArtBook() {
         >
           Meng To&apos;s Sketchbook
         </a>
+      </p>
+      <p className="mt-2 text-center text-[10.5px] tracking-[0.2em] text-muted-foreground/75 uppercase">
+        Original artwork / Desktop &amp; mobile wallpapers / Free for personal use
       </p>
 
       {/* Page template, cloned into the book on mount. */}

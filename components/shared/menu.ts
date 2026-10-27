@@ -1,7 +1,9 @@
-export const menu = [
-  { label: "Home", href: "/" },
-  { label: "Notes", href: "/blog" },
-  { label: "Art", href: "/art" },
-  { label: "About", href: "/about" },
-  { label: "Contact", href: "/contact" },
+import { House, Mail, NotebookPen, Palette, User, type LucideIcon } from "lucide-react";
+
+export const menu: { label: string; href: string; icon: LucideIcon }[] = [
+  { label: "Home", href: "/", icon: House },
+  { label: "Notes", href: "/blog", icon: NotebookPen },
+  { label: "Art", href: "/art", icon: Palette },
+  { label: "About", href: "/about", icon: User },
+  { label: "Contact", href: "/contact", icon: Mail },
 ];
