@@ -1,0 +1,66 @@
+[
+  {
+    "id": "christmas",
+    "name": "Christmas Season",
+    "date": {
+      "startMonth": 12,
+      "startDay": 1,
+      "endMonth": 12,
+      "endDay": 26
+    },
+    "theme": {
+      "gradient": "from-red-500 via-green-500 to-red-500"
+    },
+    "message": "Merry Christmas! 🎄",
+    "effect": "snow"
+  },
+  {
+    "id": "new-year",
+    "name": "New Year's Eve",
+    "date": {
+      "startMonth": 12,
+      "startDay": 29,
+      "endMonth": 1,
+      "endDay": 5
+    },
+    "theme": {
+      "gradient": "from-indigo-500 via-purple-500 to-pink-500"
+    },
+    "message": "Happy New Year! 🎆",
+    "effect": "fireworks",
+    "countdownTarget": {
+      "month": 1,
+      "day": 1,
+      "hour": 0,
+      "minute": 0
+    }
+  },
+  {
+    "id": "halloween",
+    "name": "Halloween",
+    "date": {
+      "startMonth": 10,
+      "startDay": 25,
+      "endMonth": 10,
+      "endDay": 31
+    },
+    "theme": {
+      "gradient": "from-orange-500 via-purple-900 to-black"
+    },
+    "message": "Happy Halloween! 🎃",
+    "effect": "none"
+  },
+  {
+    "id": "valentines",
+    "name": "Valentine's Day",
+    "date": {
+      "startMonth": 2,
+      "startDay": 14
+    },
+    "theme": {
+      "gradient": "from-pink-500 via-red-500 to-pink-500"
+    },
+    "message": "Happy Valentine's Day! ❤️",
+    "effect": "none"
+  }
+]

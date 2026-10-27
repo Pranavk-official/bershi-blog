@@ -1,0 +1,12 @@
+# Allow all crawlers
+User-agent: *
+Allow: /
+
+# Disallow private/admin routes if any
+Disallow: /api/
+Disallow: /_next/
+Disallow: /test/
+Disallow: /blog-test/
+
+# Sitemap location
+Sitemap: https://pranavk.site/sitemap.xml

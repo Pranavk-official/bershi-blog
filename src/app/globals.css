@@ -1,0 +1,969 @@
+/* Explicit sources: with no git repo, auto-detection ignores .gitignore and
+   scans .next's binary cache, emitting broken classes. */
+@import "tailwindcss" source(none);
+@source "../../src";
+@source "../../components";
+@source "../../lib";
+@import "tw-animate-css";
+@import "highlight.js/styles/github-dark.css";
+
+@custom-variant dark (&:is(.dark *));
+@plugin '@tailwindcss/typography';
+
+@variant dark (&:is(.dark, .dark *));
+
+:root {
+  /* Scrapbook palette — kraft paper, ink and sienna, "Field Notes" style.
+     The ember and ash scale names are kept so existing components inherit
+     the new hues without edits; only the values are kraft/ink now. */
+  --color-bg-primary: #f3ece0;
+  --color-bg-secondary: #ebe1d0;
+  --color-bg-tertiary: #ddd0b8;
+  --color-text-primary: #23201b;
+  --color-text-secondary: #4a443a;
+  --color-text-tertiary: #6e6557;
+  --color-accent-primary: #b4582f;
+  --color-accent-secondary: #7d8766;
+  --color-accent-tertiary: #cc7a52;
+  --color-surface: #fbf7ef;
+  --color-border: #d6c8ae;
+
+  /* Cut-paper corners. radius-md (--radius - 2px) = 2px, which is what
+     shadcn's Button/Input/Badge default to, so components inherit the theme
+     instead of each one hard-coding rounded-[2px]. */
+  --radius: 0.25rem;
+  --background: #f3ece0;
+  --foreground: #23201b;
+  --card: #fbf7ef;
+  --card-foreground: #23201b;
+  --popover: #fbf7ef;
+  --popover-foreground: #23201b;
+  --primary: #b4582f;
+  --primary-foreground: #fffaf2;
+  --secondary: #ebe1d0;
+  --secondary-foreground: #4a443a;
+  --muted: #ebe1d0;
+  --muted-foreground: #6e6557;
+  --accent: #f6dc7a;
+  --accent-foreground: #23201b;
+  --destructive: #b3261e;
+  --border: #d6c8ae;
+  --input: #bfb19a;
+  --ring: #b4582f;
+  --chart-1: #b4582f;
+  --chart-2: #7d8766;
+  --chart-3: #e8a49c;
+  --chart-4: #e5c14f;
+  --chart-5: #c4a27a;
+  --sidebar: #f3ece0;
+  --sidebar-foreground: #23201b;
+  --sidebar-primary: #b4582f;
+  --sidebar-primary-foreground: #fffaf2;
+  --sidebar-accent: #ebe1d0;
+  --sidebar-accent-foreground: #4a443a;
+  --sidebar-border: #d6c8ae;
+  --sidebar-ring: #b4582f;
+
+  /* Spotlight component - light mode */
+  --spotlight-glow-color: rgba(180, 88, 47, 0.08);
+  --spotlight-glow-strong: rgba(180, 88, 47, 0.14);
+  --spotlight-border-bg: rgba(180, 88, 47, 0.07);
+
+  /* Scrapbook paper swatches */
+  --kraft: #c9a27a;
+  --blush: #f1b9ae;
+  --sticky: #f4dc7c;
+  --sage: #cfd3bd;
+  --tape: rgb(226 211 178 / 0.8);
+}
+
+:root.dark {
+  /* Scrapbook - Dark Mode (night kraft, same sienna accent family) */
+  --color-bg-primary: #1c1915;
+  --color-bg-secondary: #24201b;
+  --color-bg-tertiary: #2f2a24;
+  --color-text-primary: #efe6d6;
+  --color-text-secondary: #d3c7b2;
+  --color-text-tertiary: #b5a993;
+  --color-accent-primary: #e0a07c;
+  --color-accent-secondary: #a3ab8a;
+  --color-accent-tertiary: #cc7a52;
+  --color-surface: #28231e;
+  --color-border: #3d362d;
+
+  --background: #1c1915;
+  --foreground: #efe6d6;
+  --card: #28231e;
+  --card-foreground: #efe6d6;
+  --popover: #28231e;
+  --popover-foreground: #efe6d6;
+  --primary: #e0a07c;
+  --primary-foreground: #1c1915;
+  --secondary: #2f2a24;
+  --secondary-foreground: #efe6d6;
+  --muted: #2f2a24;
+  --muted-foreground: #b5a993;
+  --accent: #3d362d;
+  --accent-foreground: #efe6d6;
+  --destructive: #f08a7a;
+  --border: rgba(239, 230, 214, 0.14);
+  --input: rgba(239, 230, 214, 0.18);
+  --ring: #cc7a52;
+  --chart-1: #e0a07c;
+  --chart-2: #a3ab8a;
+  --chart-3: #e8a49c;
+  --chart-4: #e5c14f;
+  --chart-5: #c4a27a;
+  --sidebar: #24201b;
+  --sidebar-foreground: #efe6d6;
+  --sidebar-primary: #e0a07c;
+  --sidebar-primary-foreground: #1c1915;
+  --sidebar-accent: #2f2a24;
+  --sidebar-accent-foreground: #efe6d6;
+  --sidebar-border: rgba(239, 230, 214, 0.14);
+  --sidebar-ring: #cc7a52;
+
+  /* Spotlight component - dark mode */
+  --spotlight-glow-color: rgba(224, 160, 124, 0.14);
+  --spotlight-glow-strong: rgba(224, 160, 124, 0.45);
+  --spotlight-border-bg: rgba(239, 230, 214, 0.09);
+
+  --kraft: #6b5440;
+  --blush: #7a4c46;
+  --sticky: #7a6a2e;
+  --sage: #4d5243;
+  --tape: rgb(150 130 100 / 0.6);
+}
+
+/* Force dark theme on a section regardless of user theme */
+.dark-section {
+  --background: #1c1915;
+  --foreground: #efe6d6;
+  --card: #28231e;
+  --card-foreground: #efe6d6;
+  --primary: #e0a07c;
+  --primary-foreground: #1c1915;
+  --secondary: #2f2a24;
+  --secondary-foreground: #efe6d6;
+  --muted: #2f2a24;
+  --muted-foreground: #b5a993;
+  --accent: #3d362d;
+  --accent-foreground: #efe6d6;
+  --border: rgba(239, 230, 214, 0.14);
+  --input: rgba(239, 230, 214, 0.18);
+  --ring: #cc7a52;
+  /* Force dark spotlight colors */
+  --spotlight-glow-color: rgba(224, 160, 124, 0.14);
+  --spotlight-glow-strong: rgba(224, 160, 124, 0.45);
+  --spotlight-border-bg: rgba(239, 230, 214, 0.09);
+}
+
+@theme inline {
+  /* Scrapbook - sienna ink accent scale (kept under the `ember` name) */
+  --color-ember-50: #fbf1ea;
+  --color-ember-100: #f6e0d2;
+  --color-ember-200: #edc3a8;
+  --color-ember-300: #e0a07c;
+  --color-ember-400: #cc7a52;
+  --color-ember-500: #b4582f;
+  --color-ember-600: #964624;
+  --color-ember-700: #77371d;
+  --color-ember-800: #5a2a17;
+  --color-ember-900: #3e1d10;
+
+  /* Scrapbook - paper-to-ink neutrals (kept under the `ash` name) */
+  --color-ash-50: #faf6ee;
+  --color-ash-100: #f3ece0;
+  --color-ash-200: #ebe1d0;
+  --color-ash-300: #ddd0b8;
+  --color-ash-400: #bfb19a;
+  --color-ash-500: #9a8d78;
+  --color-ash-600: #6e6557;
+  --color-ash-700: #4a443a;
+  --color-ash-800: #36312a;
+  --color-ash-850: #2d2924;
+  --color-ash-875: #27231f;
+  --color-ash-900: #211e1a;
+  --color-ash-950: #1a1714;
+
+  /* Secondary accent: sage (kept under the `teal` name) */
+  --color-teal-400: #a3ab8a;
+  --color-teal-500: #7d8766;
+
+  /* Font Families */
+  --font-crimson: var(--font-patrick-hand);
+  --font-hand: var(--font-patrick-hand);
+  --font-jetbrains: var(--font-jetbrains-mono);
+  --font-outfit: var(--font-outfit);
+  --font-nunito: var(--font-courier-prime);
+
+  --color-kraft: var(--kraft);
+  --color-blush: var(--blush);
+  --color-sticky: var(--sticky);
+  --color-sage: var(--sage);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-courier-prime);
+  --font-mono: var(--font-geist-mono);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --animate-aurora: aurora 8s ease-in-out infinite alternate;
+  --animate-infinite-scroll: infinite-scroll 25s linear infinite;
+  --animate-marquee: marquee var(--duration) linear infinite;
+  --animate-marquee-vertical: marquee-vertical var(--duration) linear infinite;
+
+  @keyframes aurora {
+    0% {
+      background-position: 0% 50%;
+      transform: rotate(-5deg) scale(0.9);
+    }
+
+    25% {
+      background-position: 50% 100%;
+      transform: rotate(5deg) scale(1.1);
+    }
+
+    50% {
+      background-position: 100% 50%;
+      transform: rotate(-3deg) scale(0.95);
+    }
+
+    75% {
+      background-position: 50% 0%;
+      transform: rotate(3deg) scale(1.05);
+    }
+
+    100% {
+      background-position: 0% 50%;
+      transform: rotate(-5deg) scale(0.9);
+    }
+  }
+
+  @keyframes infinite-scroll {
+    from {
+      transform: translateX(0);
+    }
+
+    to {
+      transform: translateX(-100%);
+    }
+  }
+
+  @keyframes marquee {
+    from {
+      transform: translateX(0);
+    }
+
+    to {
+      transform: translateX(calc(-100% - var(--gap)));
+    }
+  }
+
+  @keyframes marquee-vertical {
+    from {
+      transform: translateY(0);
+    }
+
+    to {
+      transform: translateY(calc(-100% - var(--gap)));
+    }
+  }
+
+  --animate-meteor: meteor 5s linear infinite;
+
+  @keyframes meteor {
+    0% {
+      transform: rotate(var(--angle)) translateX(0);
+      opacity: 1;
+    }
+
+    70% {
+      opacity: 1;
+    }
+
+    100% {
+      transform: rotate(var(--angle)) translateX(-500px);
+      opacity: 0;
+    }
+  }
+
+  --animate-ripple: ripple var(--duration, 2s) ease calc(var(--i, 0)*.2s) infinite;
+
+  @keyframes ripple {
+
+    0%,
+    100% {
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    50% {
+      transform: translate(-50%, -50%) scale(0.9);
+    }
+  }
+
+  --animate-grid: grid 15s linear infinite;
+
+  @keyframes grid {
+    0% {
+      transform: translateY(-50%);
+    }
+
+    100% {
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes grid {
+    0% {
+      transform: translateY(-50%);
+    }
+
+    100% {
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes meteor {
+    0% {
+      transform: rotate(var(--angle)) translateX(0);
+      opacity: 1;
+    }
+
+    70% {
+      opacity: 1;
+    }
+
+    100% {
+      transform: rotate(var(--angle)) translateX(-500px);
+      opacity: 0;
+    }
+  }
+
+  --animate-shimmer-slide: shimmer-slide var(--speed) ease-in-out infinite alternate;
+  --animate-spin-around: spin-around calc(var(--speed) * 2) infinite linear;
+
+  @keyframes shimmer-slide {
+    to {
+      transform: translate(calc(100cqw - 100%), 0);
+    }
+  }
+
+  @keyframes spin-around {
+    0% {
+      transform: translateZ(0) rotate(0);
+    }
+
+    15%,
+    35% {
+      transform: translateZ(0) rotate(90deg);
+    }
+
+    65%,
+    85% {
+      transform: translateZ(0) rotate(270deg);
+    }
+
+    100% {
+      transform: translateZ(0) rotate(360deg);
+    }
+  }
+
+  @keyframes meteor {
+    0% {
+      transform: rotate(var(--angle)) translateX(0);
+      opacity: 1;
+    }
+
+    70% {
+      opacity: 1;
+    }
+
+    100% {
+      transform: rotate(var(--angle)) translateX(-500px);
+      opacity: 0;
+    }
+  }
+
+  --animate-background-position-spin: background-position-spin 3000ms infinite alternate;
+
+  @keyframes background-position-spin {
+    0% {
+      background-position: top center;
+    }
+
+    100% {
+      background-position: bottom center;
+    }
+  }
+
+  /* Blog Design System - Custom Animations */
+  --animate-fade-up: fadeUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  --animate-fade-up-delay-1: fadeUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.15s forwards;
+  --animate-fade-up-delay-2: fadeUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.3s forwards;
+  --animate-fade-up-delay-3: fadeUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.4s forwards;
+  --animate-fade-up-delay-4: fadeUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.5s forwards;
+
+  @keyframes fadeUp {
+    0% {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  --animate-gradient: gradient 8s linear infinite;
+
+  @keyframes gradient {
+    to {
+      background-position: var(--bg-size, 300%) 0;
+    }
+  }
+}
+
+/* Christmas Snow Canvas - Apple Device Optimizations */
+.snow-canvas {
+  /* Enable hardware acceleration on Safari/iOS */
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+
+  /* Prevent flickering on iOS */
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+
+  /* Enable GPU compositing for smooth rendering */
+  will-change: transform;
+
+  /* Prevent iOS scroll bounce interference */
+  -webkit-overflow-scrolling: touch;
+
+  /* Smooth subpixel rendering on retina displays */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Respect user's motion preferences */
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  /* Specific carousel motion reduction */
+  [role="region"][aria-label*="Carousel"] * {
+    animation: none !important;
+    transition: opacity 0.01ms !important;
+  }
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  html {
+    @apply bg-background text-foreground;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans;
+    /* Paper fibre grain, multiplied over the cream (screen-blended in dark). */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .45 0 0 0 0 .38 0 0 0 0 .28 0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  h1,
+  h2,
+  h3 {
+    @apply font-hand;
+  }
+
+  /* "Simples" reading column: a single narrow, centred wrap on every page. */
+  .wrap {
+    @apply mx-auto w-full max-w-[44rem] px-5 sm:px-8;
+  }
+
+  /* Wide scrapbook page for collage layouts. */
+  .page {
+    @apply mx-auto w-full max-w-6xl px-4 sm:px-8;
+  }
+
+  /* Enhanced focus-visible styles for accessibility */
+  a:focus-visible,
+  button:focus-visible,
+  [role="button"]:focus-visible,
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible {
+    @apply outline-none ring-2 ring-ember-500 ring-offset-2;
+  }
+
+  /* Ensure focus is visible in dark mode */
+  .dark a:focus-visible,
+  .dark button:focus-visible,
+  .dark [role="button"]:focus-visible,
+  .dark input:focus-visible,
+  .dark textarea:focus-visible,
+  .dark select:focus-visible {
+    @apply ring-ember-500 ring-offset-ash-950;
+  }
+
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-ash-300 dark:bg-ash-700 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-ember-400 dark:bg-ember-600;
+  }
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+@layer utilities {
+  .animated-text {
+    background: radial-gradient(circle at var(--text-mouse-x) var(--text-mouse-y),
+        var(--gradient-text-center) 0%,
+        var(--gradient-text-edge) 40%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .dark .animated-text {
+    --gradient-text-center: oklch(0.92 0.004 286.32);
+    --gradient-text-edge: oklch(0.552 0.016 285.938);
+  }
+
+  .animated-text:not(.dark *) {
+    --gradient-text-center: oklch(0.21 0.006 285.885);
+    --gradient-text-edge: oklch(0.552 0.016 285.938);
+  }
+
+  /* Footer styles */
+  .radial-gradient-bg {
+    background: radial-gradient(circle at center,
+        var(--gradient-center) 0%,
+        var(--gradient-edge) 100%);
+  }
+
+  .newFont {
+    font-family: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
+  }
+
+  .rounded-xs {
+    border-radius: 0.5rem;
+  }
+
+  /* Carousel responsive enhancements */
+  .touch-pan-x {
+    touch-action: pan-x;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Ensure smooth animations on all devices */
+  @media (hover: none) and (pointer: coarse) {
+
+    /* Mobile/touch devices */
+    [role="region"][aria-label*="Carousel"] {
+      -webkit-tap-highlight-color: transparent;
+    }
+  }
+
+  /* Optimize for different viewport sizes */
+  @media (max-width: 767px) {
+
+    /* Mobile: Optimize for smaller screens */
+    [role="region"][aria-label*="Carousel"] {
+      padding: 0;
+    }
+  }
+
+  @media (min-width: 768px) and (max-width: 1023px) {
+
+    /* Tablet: Balanced spacing */
+    [role="region"][aria-label*="Carousel"] {
+      padding: 0 1rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+
+    /* Desktop: Full spacing */
+    [role="region"][aria-label*="Carousel"] {
+      padding: 0 2rem;
+    }
+  }
+}
+
+/* Blog Design System - Typography Plugin Customization */
+@layer components {
+  .prose-ash {
+    --tw-prose-body: var(--color-ash-950);
+    --tw-prose-headings: var(--color-ash-950);
+    --tw-prose-links: var(--color-ember-500);
+    --tw-prose-bold: var(--color-ash-950);
+    --tw-prose-code: var(--color-ember-500);
+    --tw-prose-quotes: var(--color-ash-700);
+    --tw-prose-invert-body: var(--color-ash-50);
+    --tw-prose-invert-headings: var(--color-ash-50);
+    --tw-prose-invert-links: var(--color-ember-300);
+    --tw-prose-invert-bold: var(--color-ash-50);
+    --tw-prose-invert-code: var(--color-ember-300);
+    --tw-prose-invert-quotes: var(--color-ash-400);
+  }
+
+  /* Base prose styles */
+  .prose-ash {
+    font-size: 1.0625rem;
+    line-height: 1.75;
+    font-family: var(--font-nunito);
+  }
+
+  /* Headings */
+  .prose-ash :where(h2):not(:where([class~="not-prose"] *)) {
+    font-family: var(--font-hand);
+    font-size: 2rem;
+    font-weight: 600;
+    line-height: 1.2;
+    margin-top: 4rem;
+    margin-bottom: 1.5rem;
+    position: relative;
+    padding-left: 1.5rem;
+    color: var(--tw-prose-headings);
+  }
+
+  .prose-ash :where(h2):not(:where([class~="not-prose"] *))::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: linear-gradient(to bottom, var(--color-ember-500), var(--color-teal-500));
+  }
+
+  .prose-ash :where(h3):not(:where([class~="not-prose"] *)) {
+    font-family: var(--font-hand);
+    font-size: 1.5rem;
+    font-weight: 600;
+    line-height: 1.3;
+    margin-top: 3rem;
+    margin-bottom: 1rem;
+    color: var(--tw-prose-headings);
+  }
+
+  .prose-ash :where(h4):not(:where([class~="not-prose"] *)) {
+    font-family: var(--font-hand);
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-top: 2rem;
+    margin-bottom: 0.75rem;
+    color: var(--tw-prose-headings);
+  }
+
+  /* Paragraphs */
+  .prose-ash :where(p):not(:where([class~="not-prose"] *)) {
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
+    color: var(--tw-prose-body);
+  }
+
+  /* Links */
+  .prose-ash :where(a):not(:where([class~="not-prose"] *)) {
+    color: var(--tw-prose-links);
+    text-decoration: none;
+    border-bottom: 1px solid var(--color-ember-500);
+    transition: all 350ms cubic-bezier(0.4, 0, 0.2, 1);
+    font-weight: 500;
+    border-radius: 2px;
+  }
+
+  .prose-ash :where(a):not(:where([class~="not-prose"] *)):hover {
+    color: #ffffff;
+    background-color: var(--color-teal-500);
+    border-bottom-color: var(--color-teal-500);
+    padding-left: 0.25rem;
+    padding-right: 0.25rem;
+    margin-left: -0.25rem;
+    margin-right: -0.25rem;
+  }
+
+  .prose-ash :where(a):not(:where([class~="not-prose"] *)):focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--color-ember-500);
+    padding-left: 0.25rem;
+    padding-right: 0.25rem;
+    margin-left: -0.25rem;
+    margin-right: -0.25rem;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .prose-ash :where(a):not(:where([class~="not-prose"] *)) {
+      transition: none;
+    }
+  }
+
+  /* Inline code */
+  .prose-ash :where(code):not(:where([class~="not-prose"] *)) {
+    font-family: var(--font-jetbrains);
+    font-size: 0.9em;
+    color: var(--color-ember-600);
+    background-color: var(--color-ash-200);
+    padding: 0.25rem 0.5rem;
+    border-radius: 2px;
+    border: 1px solid var(--color-ash-300);
+    font-weight: 500;
+  }
+
+  .prose-ash :where(code):not(:where([class~="not-prose"] *))::before,
+  .prose-ash :where(code):not(:where([class~="not-prose"] *))::after {
+    content: "";
+  }
+
+  /* Code blocks */
+  .prose-ash :where(pre):not(:where([class~="not-prose"] *)) {
+    background-color: var(--color-ash-200);
+    border: 1px solid var(--color-ash-300);
+    border-left: 3px solid var(--color-ember-500);
+    border-radius: 4px;
+    padding: 1.5rem;
+    margin: 2rem 0;
+    overflow-x: auto;
+  }
+
+  .prose-ash :where(pre code):not(:where([class~="not-prose"] *)) {
+    background-color: transparent;
+    border: none;
+    padding: 0;
+    color: var(--color-ash-950);
+    font-size: 0.875rem;
+    line-height: 1.7;
+  }
+
+  /* Blockquotes */
+  .prose-ash :where(blockquote):not(:where([class~="not-prose"] *)) {
+    border-left: 4px solid var(--color-ember-500);
+    background-color: var(--color-ash-100);
+    padding: 1.5rem;
+    border-radius: 0 4px 4px 0;
+    font-style: italic;
+    margin: 2rem 0;
+    color: var(--tw-prose-quotes);
+    quotes: "\201C" "\201D" "\2018" "\2019";
+  }
+
+  .prose-ash :where(blockquote p:first-of-type):not(:where([class~="not-prose"] *))::before {
+    content: open-quote;
+  }
+
+  .prose-ash :where(blockquote p:last-of-type):not(:where([class~="not-prose"] *))::after {
+    content: close-quote;
+  }
+
+  /* Lists */
+  .prose-ash :where(ul, ol):not(:where([class~="not-prose"] *)) {
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
+    padding-left: 2rem;
+  }
+
+  .prose-ash :where(li):not(:where([class~="not-prose"] *)) {
+    margin-top: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .prose-ash :where(ul > li):not(:where([class~="not-prose"] *)) {
+    padding-left: 0.5rem;
+  }
+
+  .prose-ash :where(ol > li):not(:where([class~="not-prose"] *)) {
+    padding-left: 0.5rem;
+  }
+
+  /* Strong/Bold */
+  .prose-ash :where(strong):not(:where([class~="not-prose"] *)) {
+    color: var(--tw-prose-bold);
+    font-weight: 600;
+  }
+
+  /* Images */
+  .prose-ash :where(img):not(:where([class~="not-prose"] *)) {
+    border-radius: 4px;
+    margin-top: 3rem;
+    margin-bottom: 3rem;
+    border: 1px solid var(--color-ash-300);
+  }
+
+  /* Horizontal rules */
+  .prose-ash :where(hr):not(:where([class~="not-prose"] *)) {
+    border-color: var(--color-ash-300);
+    margin-top: 3rem;
+    margin-bottom: 3rem;
+  }
+
+  /* Tables */
+  .prose-ash :where(table):not(:where([class~="not-prose"] *)) {
+    width: 100%;
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+    border-collapse: collapse;
+  }
+
+  .prose-ash :where(thead):not(:where([class~="not-prose"] *)) {
+    border-bottom: 2px solid var(--color-ash-300);
+  }
+
+  .prose-ash :where(thead th):not(:where([class~="not-prose"] *)) {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: var(--tw-prose-headings);
+  }
+
+  .prose-ash :where(tbody td):not(:where([class~="not-prose"] *)) {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--color-ash-200);
+  }
+
+  /* Dark mode overrides */
+  .dark .prose-ash :where(code):not(:where([class~="not-prose"] *)) {
+    color: var(--color-ember-300);
+    background-color: var(--color-ash-850);
+    border-color: var(--color-ash-800);
+  }
+
+  .dark .prose-ash :where(pre):not(:where([class~="not-prose"] *)) {
+    background-color: var(--color-ash-850);
+    border-color: var(--color-ash-800);
+  }
+
+  .dark .prose-ash :where(pre code):not(:where([class~="not-prose"] *)) {
+    color: var(--color-ash-50);
+  }
+
+  .dark .prose-ash :where(blockquote):not(:where([class~="not-prose"] *)) {
+    background-color: var(--color-ash-900);
+  }
+
+  .dark .prose-ash :where(img):not(:where([class~="not-prose"] *)) {
+    border-color: var(--color-ash-800);
+  }
+
+  .dark .prose-ash :where(hr):not(:where([class~="not-prose"] *)) {
+    border-color: var(--color-ash-800);
+  }
+
+  .dark .prose-ash :where(thead):not(:where([class~="not-prose"] *)) {
+    border-bottom-color: var(--color-ash-800);
+  }
+
+  .dark .prose-ash :where(tbody td):not(:where([class~="not-prose"] *)) {
+    border-bottom-color: var(--color-ash-850);
+  }
+}
+/* Scrapbook: a strip of washi tape pinned to the top edge of a paper card. */
+@utility tape {
+  position: relative;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: -0.75rem;
+    left: 50%;
+    width: 6.5rem;
+    height: 1.6rem;
+    translate: -50% 0;
+    rotate: -3deg;
+    background: var(--tape);
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.08);
+    pointer-events: none;
+  }
+}
+
+/* Scrapbook: cut-paper sheet with a soft drop shadow. */
+@utility paper {
+  background-color: var(--card);
+  box-shadow:
+    0 1px 1px rgb(60 45 25 / 0.08),
+    0 6px 14px -6px rgb(60 45 25 / 0.25);
+}
+
+/* Scrapbook: hand-torn paper edge. Clips shadows and ::before, so put
+   `tape` on a wrapper, not on the torn element itself. */
+@utility torn {
+  clip-path: polygon(0% 2%, 6% 0%, 14% 1.5%, 22% 0%, 31% 1.8%, 40% 0.3%, 49% 1.6%, 58% 0%, 67% 1.4%, 76% 0.2%, 85% 1.7%, 93% 0%, 100% 1.5%, 99% 12%, 100% 25%, 98.8% 38%, 100% 51%, 99% 64%, 100% 77%, 98.9% 89%, 100% 98%, 94% 100%, 86% 98.4%, 77% 100%, 68% 98.6%, 59% 100%, 50% 98.2%, 41% 100%, 32% 98.5%, 23% 100%, 14% 98.3%, 6% 100%, 0% 98.5%, 1% 88%, 0% 75%, 1.2% 62%, 0% 49%, 1% 36%, 0% 23%, 1.1% 11%);
+}
+
+/* Scrapbook: ruled notebook paper. */
+@utility lined {
+  background-color: #fbfaf6;
+  background-image: repeating-linear-gradient(transparent 0 27px, rgb(120 150 190 / 0.35) 27px 28px);
+  color: #23201b;
+}
+
+/* Scrapbook: graph paper. */
+@utility graph {
+  background-color: #fbfaf6;
+  background-image:
+    linear-gradient(rgb(120 150 190 / 0.25) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(120 150 190 / 0.25) 1px, transparent 1px);
+  background-size: 14px 14px;
+}
