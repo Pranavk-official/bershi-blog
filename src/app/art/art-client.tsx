@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { getImageProps } from "next/image";
 import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut } from "lucide-react";
 import type { PageFlip } from "page-flip";
 
-import { wallpapers, type Wallpaper } from "@sections/wallpapers/config/wallpapers";
+import type { Wallpaper } from "@sections/wallpapers/config/wallpapers";
 import { Button } from "@components/ui/button";
 import { cn } from "@lib/utils";
 
@@ -18,32 +18,37 @@ type Page = {
   plates: Wallpaper[];
   /** "half": this page's side of a piece spread across both pages. */
   art?: { plate: Wallpaper; fit: "half" | "whole" };
+  /** Page number, from 1. */
+  n: number;
 };
 
 // The book is a run of open spreads (desktop and phone). A desktop piece runs
-// across both pages;
-// mobile pieces pair up, one per page.
-const wide = wallpapers.filter((w) => w.aspect === "16x9");
-const tall = wallpapers.filter((w) => w.aspect === "9x16");
-const spreads: Wallpaper[][] = [
-  ...wide.map((w) => [w]),
-  ...Array.from({ length: Math.ceil(tall.length / 2) }, (_, i) => tall.slice(i * 2, i * 2 + 2)),
-];
-const spreadPages: Page[] = spreads.flatMap((plates, i): Page[] =>
-  plates[0].aspect === "16x9"
-    ? (["left", "right"] as const).map((side) => ({
-        key: `${i}-${side}`,
-        side,
-        plates,
-        art: { plate: plates[0], fit: "half" },
-      }))
-    : (["left", "right"] as const).map((side, j) => ({
-        key: `${i}-${side}`,
-        side,
-        plates,
-        art: plates[j] && { plate: plates[j], fit: "whole" },
-      })),
-);
+// across both pages; mobile pieces pair up, one per page.
+function buildPages(wallpapers: Wallpaper[]): Page[] {
+  const wide = wallpapers.filter((w) => w.aspect === "16x9");
+  const tall = wallpapers.filter((w) => w.aspect === "9x16");
+  const spreads: Wallpaper[][] = [
+    ...wide.map((w) => [w]),
+    ...Array.from({ length: Math.ceil(tall.length / 2) }, (_, i) => tall.slice(i * 2, i * 2 + 2)),
+  ];
+  return spreads
+    .flatMap((plates, i): Omit<Page, "n">[] =>
+      plates[0].aspect === "16x9"
+        ? (["left", "right"] as const).map((side) => ({
+            key: `${i}-${side}`,
+            side,
+            plates,
+            art: { plate: plates[0], fit: "half" },
+          }))
+        : (["left", "right"] as const).map((side, j) => ({
+            key: `${i}-${side}`,
+            side,
+            plates,
+            art: plates[j] && { plate: plates[j], fit: "whole" },
+          })),
+    )
+    .map((page, i) => ({ ...page, n: i + 1 }));
+}
 
 // `page` is the page size; the open spread is two pages side by side. `fit`
 // sizes the book's wrapper so the whole spread fits the viewport. Phones get
@@ -121,7 +126,7 @@ function Sheet({ page, width, layer = true }: { page: Page; width: number; layer
       {/* Folio: a seal pressed at the outer foot of the page. */}
       <svg
         viewBox="0 0 100 100"
-        aria-label={`Page ${spreadPages.indexOf(page) + 1}`}
+        aria-label={`Page ${page.n}`}
         role="img"
         className={cn(
           "absolute bottom-[4%] w-[max(22px,10cqw)] font-hand opacity-85",
@@ -134,7 +139,7 @@ function Sheet({ page, width, layer = true }: { page: Page; width: number; layer
         />
         <rect x="10" y="10" width="80" height="80" rx="2" fill="none" stroke={PAPER_INK} strokeWidth="4" />
         <text x="50" y="54" fill={PAPER_INK} fontSize="68" textAnchor="middle" dominantBaseline="central">
-          {spreadPages.indexOf(page) + 1}
+          {page.n}
         </text>
         {/* Worn spots where the ink didn't take. */}
         <g fill={PAPER_INK}>
@@ -164,9 +169,6 @@ function Sheet({ page, width, layer = true }: { page: Page; width: number; layer
 }
 
 const TURN_MS = 620;
-const spreadCount = spreadPages.length / 2;
-const leftOf = (s: number) => spreadPages[s * 2];
-const rightOf = (s: number) => spreadPages[s * 2 + 1];
 
 /**
  * Phone book: the same open spreads as desktop, turned with a CSS 3D hinge
@@ -175,7 +177,10 @@ const rightOf = (s: number) => spreadPages[s * 2 + 1];
  * left like a real leaf. Drag to turn (it follows the finger), or tap the
  * right / left half.
  */
-function PhoneBook({ onChange }: { onChange: (spread: number) => void }) {
+function PhoneBook({ pages, onChange }: { pages: Page[]; onChange: (spread: number) => void }) {
+  const spreadCount = pages.length / 2;
+  const leftOf = (s: number) => pages[s * 2];
+  const rightOf = (s: number) => pages[s * 2 + 1];
   const [spread, setSpread] = useState(0);
   // dir 1 = forward, -1 = back. p is how far the turn has gone, 0 → 1.
   const [turn, setTurn] = useState<{ dir: 1 | -1; p: number; dragging: boolean } | null>(null);
@@ -310,7 +315,9 @@ function PhoneBook({ onChange }: { onChange: (spread: number) => void }) {
  * and finally removes the nodes it owns, so React renders those pages into a
  * hidden template and the library gets clones. Phones get PhoneBook.
  */
-export function ArtBook() {
+export function ArtBook({ wallpapers }: { wallpapers: Wallpaper[] }) {
+  const spreadPages = useMemo(() => buildPages(wallpapers), [wallpapers]);
+  const leftOf = (s: number) => spreadPages[s * 2];
   const template = useRef<HTMLDivElement>(null);
   const stage = useRef<HTMLDivElement>(null);
   const book = useRef<PageFlip | null>(null);
@@ -408,7 +415,7 @@ export function ArtBook() {
               className="absolute -z-10 inset-x-[9%] top-[62%] -bottom-[2%] bg-[radial-gradient(50%_44%_at_50%_42%,rgb(44_32_14/0.4),rgb(44_32_14/0.17)_48%,transparent_78%)]"
             />
             {phone ? (
-              <PhoneBook onChange={setCurrent} />
+              <PhoneBook pages={spreadPages} onChange={setCurrent} />
             ) : (
               // Keyed so a layout switch gets a fresh node page-flip hasn't touched.
               <div key="spread" ref={stage} />

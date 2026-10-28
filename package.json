@@ -23,6 +23,7 @@
     "@tsparticles/react": "^3.0.0",
     "@tsparticles/slim": "^3.9.1",
     "@uidotdev/usehooks": "^2.4.1",
+    "@upstash/redis": "^1.40.0",
     "class-variance-authority": "^0.7.1",
     "classnames": "^2.5.1",
     "clsx": "^2.1.1",

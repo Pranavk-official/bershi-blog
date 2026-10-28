@@ -4,13 +4,13 @@ import Link from "next/link";
 import { ArrowRight, Check } from "lucide-react";
 
 import { siteConfig } from "@config/site";
+import { visibleWallpapers } from "@lib/hidden-art";
 import { pageMeta, person } from "@lib/seo";
 import { JsonLd } from "@components/shared/JsonLd";
 import { getAllPublished } from "@lib/notion";
 import { ListingPost } from "@components/blog/ListingPost";
 import { Button } from "@components/ui/button";
 import { Flower, Smiley, Squiggle, Star } from "@components/shared/Doodles";
-import { wallpapers } from "@sections/wallpapers/config/wallpapers";
 
 export const revalidate = 60;
 
@@ -23,10 +23,10 @@ const elsewhere = [
   { label: "Email me", href: siteConfig.links.email },
 ];
 
-const filmstrip = wallpapers.slice(0, 3);
 
 export default async function Home() {
   const posts = (await getAllPublished()).slice(0, 4);
+  const filmstrip = (await visibleWallpapers()).slice(0, 3);
   const latest = posts[0];
 
   return (

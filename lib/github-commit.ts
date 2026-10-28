@@ -29,10 +29,10 @@ export async function readRepoFile(path: string): Promise<string> {
   return Buffer.from(file.content, "base64").toString("utf8");
 }
 
-type NewFile = { path: string } & ({ text: string } | { bytes: Buffer });
+type FileChange = { path: string } & ({ text: string } | { bytes: Buffer });
 
 /** Commits `files` on top of the branch head. Fails (no force push) if the branch moved meanwhile. */
-export async function commitFiles(message: string, files: NewFile[]): Promise<string> {
+export async function commitFiles(message: string, files: FileChange[]): Promise<string> {
   const head = await gh<{ object: { sha: string } }>(`/git/ref/heads/${branch()}`);
   const parent = await gh<{ tree: { sha: string } }>(`/git/commits/${head.object.sha}`);
 

@@ -1,15 +1,17 @@
-import Image from "next/image";
 import { redirect } from "next/navigation";
 
 import { isAdmin } from "@lib/admin-auth";
 import { githubConfigured } from "@lib/github-commit";
 import { wallpapers } from "@sections/wallpapers/config/wallpapers";
+import { hiddenArtConfigured, hiddenIds } from "@lib/hidden-art";
 import { Button } from "@components/ui/button";
 import { logOutAction } from "./actions";
 import { ArtEditor } from "./art-editor";
+import { ArtList } from "./art-list";
 
 export default async function AdminPage() {
   if (!(await isAdmin())) redirect("/admin/login");
+  const hidden = await hiddenIds().catch(() => []);
 
   return (
     <div className="flex flex-col gap-12">
@@ -28,6 +30,12 @@ export default async function AdminPage() {
         </p>
       )}
 
+      {!hiddenArtConfigured() && (
+        <p role="alert" className="paper p-4 text-sm">
+          Delete and restore are off: set <code>UPSTASH_REDIS_REST_URL</code> and <code>UPSTASH_REDIS_REST_TOKEN</code>.
+        </p>
+      )}
+
       <section aria-labelledby="new-heading" className="flex flex-col gap-4">
         <h2 id="new-heading" className="text-3xl leading-none">
           Add a piece
@@ -37,21 +45,9 @@ export default async function AdminPage() {
 
       <section aria-labelledby="live-heading" className="flex flex-col gap-4">
         <h2 id="live-heading" className="text-3xl leading-none">
-          On the site ({wallpapers.length})
+          Published ({wallpapers.length})
         </h2>
-        <ul className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4">
-          {wallpapers.map((w) => (
-            <li key={w.id} className="paper flex flex-col gap-2 p-2 pb-3">
-              <div className={w.aspect === "16x9" ? "relative aspect-video" : "relative aspect-[9/16]"}>
-                <Image src={w.src} alt={w.title} fill sizes="240px" className="object-cover" />
-              </div>
-              <p className="font-hand text-lg leading-tight">{w.title}</p>
-              <p className="text-xs text-muted-foreground">
-                {w.collection} · {w.resolution}
-              </p>
-            </li>
-          ))}
-        </ul>
+        <ArtList wallpapers={wallpapers} hidden={hidden} canHide={hiddenArtConfigured()} />
       </section>
     </div>
   );
