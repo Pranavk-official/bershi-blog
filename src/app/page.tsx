@@ -46,7 +46,7 @@ export default async function Home() {
       >
         <Flower className="hidden self-center md:block" />
 
-        <div className="tape relative mt-4 -rotate-1">
+        <div className="tape relative mt-4 -rotate-1 before:z-20">
           {/* Phones: the photo is taped on and overlaps the note, right above the name. */}
           <div className="relative z-10 mx-auto -mb-16 w-[72%] rotate-[3deg] bg-white p-2.5 pb-10 shadow-lg md:hidden dark:bg-ash-200">
             <Image

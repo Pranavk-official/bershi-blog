@@ -6,7 +6,7 @@ import { siteConfig } from "@config/site";
 // search engines need the CSS and JS there to render the pages.
 export default function robots(): MetadataRoute.Robots {
   return {
-    rules: { userAgent: "*", allow: "/", disallow: ["/api/", "/test"] },
+    rules: { userAgent: "*", allow: "/", disallow: ["/api/", "/admin", "/test"] },
     sitemap: `${siteConfig.url}/sitemap.xml`,
   };
 }

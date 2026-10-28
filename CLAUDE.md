@@ -34,7 +34,13 @@ NOTION_TOKEN=secret_xxx
 NOTION_DATA_SOURCE_ID=database_id
 HOSTINGER_MAIL_TOKEN=bearer_token
 HOSTINGER_MAILBOX_ID=mailbox_resource_id
+ADMIN_PASSWORD=long_random_string      # /admin sign-in; also the cookie signing key
+GITHUB_TOKEN=github_pat_xxx            # fine-grained, Contents: read & write on this repo
+GITHUB_REPO=Pranavk-official/bershi-blog
+GITHUB_BRANCH=main                     # optional
 ```
+
+`/admin` (art uploads) lives in `src/app/admin/`. Auth is `lib/admin-auth.ts` (signed httpOnly cookie, checked in the page and in `src/app/api/admin/art/route.ts`); no `ADMIN_PASSWORD` means nobody can sign in. Publishing commits the image to `public/wallpapers/<aspect>/` and the updated `src/sections/wallpapers/config/wallpapers.json` as one commit via `lib/github-commit.ts`, so new art appears after Vercel redeploys. The editor (`art-editor.tsx`) is fabric + perfect-freehand, adapted from delphitools' substrata; uploads must stay under Vercel's 4.5 MB body limit.
 
 When `NEXT_PUBLIC_SITE_URL` is unset, `getBaseUrl()` falls back to the production domain `https://bershi-blog.vercel.app` (hardcoded in both `config/site.ts` and `src/config/site.ts`; `src/app/robots.ts` and `sitemap.ts` build their URLs from it). Per-page SEO goes through `pageMeta()` in `lib/seo.ts`, since a page that sets `openGraph`/`twitter` drops its parent's.
 
