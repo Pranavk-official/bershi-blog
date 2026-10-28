@@ -7,7 +7,7 @@ import { siteConfig } from "@/config/site";
 // Shared Open Graph card: the home hero's collage, rebuilt for a 1200×630
 // share image. A flower doodle, the torn kraft note with the title, the
 // smiley sticker, a taped print with the site's address written under it,
-// and a lined-paper checklist under a star doodle, all on grained paper.
+// and a lined-paper checklist under a star doodle.
 
 export const ogSize = { width: 1200, height: 630 };
 
@@ -26,10 +26,9 @@ const tornPaper = `url("data:image/svg+xml,${encodeURIComponent(
   `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none"><polygon points="${torn}" fill="${kraft}"/></svg>`,
 )}")`;
 
-// Paper grain, the same two noise layers as the art book's pages.
-const grain = `data:image/svg+xml,${encodeURIComponent(
-  `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630"><filter id="g"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="3" stitchTiles="stitch"/><feColorMatrix values="0 0 0 0 .42 0 0 0 0 .36 0 0 0 0 .27 0 0 0 .2 0"/></filter><filter id="t"><feTurbulence type="fractalNoise" baseFrequency=".03" numOctaves="4" stitchTiles="stitch"/><feColorMatrix values="0 0 0 0 .5 0 0 0 0 .43 0 0 0 0 .32 0 0 0 .14 0"/></filter><rect width="100%" height="100%" filter="url(#t)"/><rect width="100%" height="100%" filter="url(#g)"/></svg>`,
-)}`;
+// No paper grain here: noise is random per pixel, which PNG can't compress.
+// With it the card weighed 1.3 MB, past what WhatsApp and others will show in
+// a link preview; without it each card is under 200 KB.
 
 const file = (...p: string[]) => readFile(join(process.cwd(), ...p));
 const dataUrl = async (path: string) =>
@@ -225,9 +224,6 @@ export async function ogCard({
           </div>
         )}
 
-        {/* Grain over everything, so it all reads as paper. */}
-        {/* eslint-disable-next-line @next/next/no-img-element -- ImageResponse renders plain <img> */}
-        <img src={grain} alt="" width={1200} height={630} style={{ position: "absolute", top: 0, left: 0 }} />
       </div>
     ),
     {
