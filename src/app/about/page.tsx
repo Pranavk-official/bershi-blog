@@ -1,12 +1,13 @@
 import { Metadata } from "next";
 
 import { siteConfig } from "@config/site";
+import { pageMeta } from "@lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMeta({
   title: "About",
-  description: siteConfig.description,
-  alternates: { canonical: "/about" },
-};
+  description: "Who Pranav K is: a self-taught full stack developer who builds web apps, mentors new developers and draws.",
+  path: "/about",
+});
 
 export default function AboutPage() {
   const { subheading, intro, paragraphs } = siteConfig.about;

@@ -65,7 +65,7 @@ export function AnnouncementBar({ latestPost }: AnnouncementBarProps) {
           <div className="flex items-center gap-2">
             <span className="hidden sm:inline">Latest Blog:</span>
             <Link
-              href={`/blog/${latestPost.slug}`}
+              href={`/notes/${latestPost.slug}`}
               className="flex items-center gap-1 underline decoration-white/50 underline-offset-4 hover:decoration-white"
             >
               {latestPost.title}
@@ -122,7 +122,7 @@ export function AnnouncementBar({ latestPost }: AnnouncementBarProps) {
               >
                 <span className="hidden sm:inline">Latest Update:</span>
                 <Link
-                  href={`/blog/${latestPost?.slug}`}
+                  href={`/notes/${latestPost?.slug}`}
                   className="flex items-center gap-1 underline decoration-white/50 underline-offset-4 hover:decoration-white"
                 >
                   {latestPost?.title}

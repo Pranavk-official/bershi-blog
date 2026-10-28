@@ -20,7 +20,7 @@ function formatDate(dateString: string): string {
 
 export function ArticleCard({ article, index }: ArticleCardProps) {
     return (
-        <Link href={`/blog/${article.slug}`} className="group/card block h-full">
+        <Link href={`/notes/${article.slug}`} className="group/card block h-full">
             <div className="relative z-10 h-full overflow-hidden rounded-lg bg-card">
                 <div className="flex flex-col h-full p-6">
                     <div className="flex flex-col space-y-1.5 mb-4">

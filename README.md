@@ -10,7 +10,7 @@ A modern, performant personal portfolio built with **Next.js 16**, **React 19**,
 
 - **Multi-section single page** — Hero, Skills, Projects, Experience, Achievements, Contact, and Footer
 - **Notion-powered blog** — Posts are fetched from a Notion database, with search, tag-filtering, and pagination
-- **Dedicated pages** — `/blog`, `/blog/[slug]`, `/projects`, `/projects/[slug]`, `/achievements/[slug]`
+- **Dedicated pages** — `/notes`, `/notes/[slug]`, `/projects`, `/projects/[slug]`, `/achievements/[slug]`
 - **Dark / Light mode** — Flicker-free theme toggle with localStorage persistence
 - **3D animations** — Three.js (`@react-three/fiber`, `@react-three/drei`, `@react-three/rapier`) scenes in the hero
 - **Smooth animations** — GSAP and Motion (Framer Motion v12) for scroll-driven and entrance animations
@@ -61,7 +61,7 @@ portfolio-next/
 │   ├── app/
 │   │   ├── page.tsx         # Home page (assembles all sections)
 │   │   ├── layout.tsx       # Root layout (fonts, theme, NavDock, SnowFX)
-│   │   ├── blog/            # /blog list page + /blog/[slug] detail page
+│   │   ├── notes/           # /notes list page + /notes/[slug] detail page (old /blog URLs redirect)
 │   │   ├── projects/        # /projects list + /projects/[slug]
 │   │   ├── achievements/    # /achievements/[slug]
 │   │   ├── sitemap.ts       # Auto-generated sitemap

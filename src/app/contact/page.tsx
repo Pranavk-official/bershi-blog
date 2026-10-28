@@ -1,12 +1,14 @@
 import { Metadata } from "next";
 
+import { pageMeta } from "@lib/seo";
+
 import { HostingerContactForm } from "@components/shared/HostingerContactForm";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMeta({
   title: "Contact",
-  description: "Have a project in mind or just want to say hello? Get in touch.",
-  alternates: { canonical: "/contact" },
-};
+  description: "Have a project in mind or just want to say hello? Get in touch with Pranav K.",
+  path: "/contact",
+});
 
 export default function ContactPage() {
   return (

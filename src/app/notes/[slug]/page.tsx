@@ -18,6 +18,9 @@ import {
 } from "@/components/ui/breadcrumb";
 import { CalendarIcon, ChevronLeft } from "lucide-react";
 import { BackToTop } from "@/components/blog/back-to-top";
+import { JsonLd } from "@/components/shared/JsonLd";
+import { siteConfig } from "@config/site";
+import { person } from "@lib/seo";
 
 // Force all posts to be generated on-demand (SSR)
 // export const dynamic = 'force-dynamic';
@@ -66,14 +69,13 @@ export async function generateMetadata({
         };
     }
 
-    const siteConfig = (await import("@config/site")).siteConfig;
-    const postUrl = `${siteConfig.url}/blog/${slug}`;
+    const postUrl = `${siteConfig.url}/notes/${slug}`;
 
     return {
         title: post.title,
         description: post.description,
         alternates: {
-            canonical: `/blog/${slug}`,
+            canonical: `/notes/${slug}`,
         },
         openGraph: {
             title: post.title,
@@ -83,6 +85,7 @@ export async function generateMetadata({
             siteName: siteConfig.name,
             publishedTime: post.date,
             authors: [siteConfig.author.name],
+            tags: post.tags,
         },
         twitter: {
             card: "summary_large_image",
@@ -121,6 +124,18 @@ export default async function PostPage({
 
     return (
         <div className="min-h-screen bg-background py-16 px-4 sm:px-6 lg:px-8">
+            <JsonLd
+                data={{
+                    "@type": "BlogPosting",
+                    headline: post.title,
+                    description: post.description,
+                    datePublished: post.date || undefined,
+                    keywords: post.tags,
+                    url: `${siteConfig.url}/notes/${slug}`,
+                    image: `${siteConfig.url}/notes/${slug}/opengraph-image`,
+                    author: person,
+                }}
+            />
             <article className="max-w-3xl mx-auto">
                 {/* Breadcrumbs */}
                 <Breadcrumb className="mb-8">
@@ -133,7 +148,7 @@ export default async function PostPage({
                         <BreadcrumbSeparator />
                         <BreadcrumbItem>
                             <BreadcrumbLink asChild>
-                                <Link href="/blog">Blog</Link>
+                                <Link href="/notes">Notes</Link>
                             </BreadcrumbLink>
                         </BreadcrumbItem>
                         <BreadcrumbSeparator />
@@ -148,7 +163,7 @@ export default async function PostPage({
                 {/* Back to All Posts Button */}
                 <div className="mb-6">
                     <Button variant="ghost" size="sm" asChild>
-                        <Link href="/blog" className="gap-2">
+                        <Link href="/notes" className="gap-2">
                             <ChevronLeft className="h-4 w-4" />
                             Back to All Posts
                         </Link>
@@ -203,7 +218,7 @@ export default async function PostPage({
                 {/* Bottom Navigation */}
                 <div className="flex justify-center pt-8 border-t">
                     <Button variant="outline" asChild>
-                        <Link href="/blog" className="gap-2">
+                        <Link href="/notes" className="gap-2">
                             <ChevronLeft className="h-4 w-4" />
                             Back to All Posts
                         </Link>

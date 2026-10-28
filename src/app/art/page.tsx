@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 
-import { siteConfig } from "@config/site";
+import { pageMeta } from "@lib/seo";
 import { ArtBook } from "./art-client";
 
 const title = "Art";
@@ -8,8 +8,7 @@ const description =
   "Original artwork by Pranav K — desktop and mobile wallpapers, free to download for personal use.";
 
 export const metadata: Metadata = {
-  title,
-  description,
+  ...pageMeta({ title, description, path: "/art", image: "/art/opengraph-image" }),
   keywords: [
     "art",
     "original artwork",
@@ -19,15 +18,6 @@ export const metadata: Metadata = {
     "free wallpapers",
     "Pranav K art",
   ],
-  alternates: { canonical: "/art" },
-  openGraph: {
-    title,
-    description,
-    type: "website",
-    url: `${siteConfig.url}/art`,
-    siteName: siteConfig.name,
-    locale: "en_US",
-  },
 };
 
 export default function ArtPage() {

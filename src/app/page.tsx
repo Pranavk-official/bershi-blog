@@ -4,6 +4,8 @@ import Link from "next/link";
 import { ArrowRight, Check } from "lucide-react";
 
 import { siteConfig } from "@config/site";
+import { pageMeta, person } from "@lib/seo";
+import { JsonLd } from "@components/shared/JsonLd";
 import { getAllPublished } from "@lib/notion";
 import { ListingPost } from "@components/blog/ListingPost";
 import { Button } from "@components/ui/button";
@@ -12,20 +14,7 @@ import { wallpapers } from "@sections/wallpapers/config/wallpapers";
 
 export const revalidate = 60;
 
-export const metadata: Metadata = {
-  title: siteConfig.title,
-  description: siteConfig.description,
-  alternates: {
-    canonical: "/",
-  },
-  openGraph: {
-    title: siteConfig.title,
-    description: siteConfig.description,
-    url: siteConfig.url,
-    siteName: siteConfig.name,
-    type: "website",
-  },
-};
+export const metadata: Metadata = pageMeta({ description: siteConfig.description, path: "/" });
 
 const elsewhere = [
   { label: "GitHub", href: siteConfig.links.github },
@@ -42,6 +31,14 @@ export default async function Home() {
 
   return (
     <div className="page">
+      <JsonLd
+        data={{
+          "@graph": [
+            { "@type": "WebSite", name: siteConfig.name, url: siteConfig.url, description: siteConfig.description },
+            person,
+          ],
+        }}
+      />
       {/* Hero collage: kraft note, polaroid, notepad, sage scrap. */}
       <section
         aria-labelledby="hero-heading"
@@ -78,7 +75,7 @@ export default async function Home() {
             </p>
             <div className="mt-7 flex flex-wrap items-center gap-5">
               <Button asChild>
-                <Link href="/blog">
+                <Link href="/notes">
                   Read my notes <ArrowRight />
                 </Link>
               </Button>
@@ -106,7 +103,7 @@ export default async function Home() {
           </div>
           {latest && (
             <Link
-              href={`/blog/${latest.slug}`}
+              href={`/notes/${latest.slug}`}
               className="relative ml-6 block md:-mt-6 w-fit max-w-[16rem] -rotate-2 bg-sage px-5 py-3 text-sm shadow-md"
             >
               <span className="block text-xs uppercase tracking-wide text-muted-foreground">
@@ -154,7 +151,7 @@ export default async function Home() {
             the Journal
           </h2>
           <Link
-            href="/blog"
+            href="/notes"
             className="inline-flex items-center gap-2 border-b border-foreground text-xs font-bold uppercase tracking-wide"
           >
             View all <ArrowRight className="size-3.5" />

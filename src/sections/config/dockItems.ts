@@ -36,7 +36,7 @@ export const dockItems: DockItem[] = [
     id: "blog",
     icon: FaPenNib,
     label: "Blog",
-    href: "/blog",
+    href: "/notes",
   },
   {
     id: "projects",

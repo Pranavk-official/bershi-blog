@@ -50,7 +50,7 @@ const LatestArticlesSection = async () => {
 
                 {/* View All Articles Link */}
                 <div className="flex justify-center">
-                    <Link href="/blog">
+                    <Link href="/notes">
                         <Button variant="ghost" className="group gap-2 text-primary">
                             View All Articles
                             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />

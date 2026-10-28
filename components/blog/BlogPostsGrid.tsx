@@ -28,7 +28,7 @@ export function BlogPostsGrid({ posts }: BlogPostsGridProps) {
             {posts.map((post, idx) => (
                 <BlurFade key={post.id} delay={0.25 + idx * 0.05} inView>
                     <SpotLightItem className="h-full">
-                        <Link href={`/blog/${post.slug}`} className="group/card block h-full">
+                        <Link href={`/notes/${post.slug}`} className="group/card block h-full">
                             <div className="relative z-10 h-full overflow-hidden rounded-lg bg-card">
                                 <div className="flex flex-col h-full p-6">
                                     <div className="flex flex-col space-y-1.5 mb-4">

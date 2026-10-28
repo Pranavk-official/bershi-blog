@@ -1,6 +1,13 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // /blog was renamed to /notes; keep old links and search results working.
+  async redirects() {
+    return [
+      { source: "/blog", destination: "/notes", permanent: true },
+      { source: "/blog/:slug*", destination: "/notes/:slug*", permanent: true },
+    ];
+  },
   async headers() {
     const isDev = process.env.NODE_ENV === "development";
     const cspHeader = [

@@ -58,7 +58,7 @@ export function ListingPost({
   index?: number;
   isNew?: boolean;
 }) {
-  const href = `/blog/${post.slug}`;
+  const href = `/notes/${post.slug}`;
   const mount = mounts[index % mounts.length];
 
   return (

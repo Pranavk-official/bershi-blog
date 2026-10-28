@@ -36,7 +36,7 @@ HOSTINGER_MAIL_TOKEN=bearer_token
 HOSTINGER_MAILBOX_ID=mailbox_resource_id
 ```
 
-When `NEXT_PUBLIC_SITE_URL` is unset, `getBaseUrl()` falls back to the production domain `https://bershi-blog.vercel.app` (hardcoded in both `config/site.ts` and `src/config/site.ts`, and in `public/robots.txt`'s `Sitemap:` line).
+When `NEXT_PUBLIC_SITE_URL` is unset, `getBaseUrl()` falls back to the production domain `https://bershi-blog.vercel.app` (hardcoded in both `config/site.ts` and `src/config/site.ts`; `src/app/robots.ts` and `sitemap.ts` build their URLs from it). Per-page SEO goes through `pageMeta()` in `lib/seo.ts`, since a page that sets `openGraph`/`twitter` drops its parent's.
 
 When `NOTION_TOKEN` / `NOTION_DATA_SOURCE_ID` are missing, `lib/notion.ts` silently returns empty results — pages render but the blog list is empty. Never throw on missing creds.
 
@@ -80,7 +80,7 @@ Section conventions: `<section id="…" aria-labelledby="…-heading">`, gradien
 
 ### Blog (Notion-powered, not Markdown)
 
-`lib/notion.ts` exposes `getAllPublished()`, `getFilteredPosts(page, pageSize, search, tag)` (in-memory filtering, refetches all posts each call), `getSinglePost(slug)` (uses `notion-to-md`), `getAllTags()`. ISR: `/blog` = 60s, `/blog/[slug]` = 600s, root layout = 60s.
+`lib/notion.ts` exposes `getAllPublished()`, `getFilteredPosts(page, pageSize, search, tag)` (in-memory filtering, refetches all posts each call), `getSinglePost(slug)` (uses `notion-to-md`), `getAllTags()`. ISR: `/notes` = 60s, `/notes/[slug]` = 600s (`/blog` and `/blog/*` 308-redirect here via `next.config.ts`), root layout = 60s.
 
 Notion DB properties expected: `Title`, `Slug`, `Date`, `Tags`, `Description`, `Published`.
 

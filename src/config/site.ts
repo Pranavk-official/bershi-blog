@@ -18,7 +18,7 @@ export const siteConfig = {
   title: "Pranav K - Full Stack Developer",
   tagline: "Full stack developer. Notes on code, craft and the web.",
   description:
-    "Full Stack Developer with proven expertise in designing, developing, and deploying scalable web applications. Proficient in MongoDB, Express.js, React.js, and Node.js, with strong command over front-end and back-end development, RESTful API integration, and database management.",
+    "Pranav K, full stack developer. Notes on code, craft and the web, plus original art and free wallpapers.",
   url: baseUrl,
   ogImage: `${baseUrl}/og-image.png`, // Use dynamic base URL
   links: {

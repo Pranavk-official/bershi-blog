@@ -1,6 +1,8 @@
 import { Metadata } from "next";
 import { Suspense } from "react";
 
+import { pageMeta } from "@lib/seo";
+
 import { getFilteredPosts, getAllTags } from "@/lib/notion";
 import { parseSort } from "@/lib/blogSort";
 import { Search } from "@/components/blog/search";
@@ -10,13 +12,12 @@ import { Pagination } from "@/components/blog/pagination";
 import { ListingPost } from "@/components/blog/ListingPost";
 import { Skeleton } from "@/components/ui/skeleton";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMeta({
     title: "Notes",
-    description: "Insights, tutorials, and updates about web development, design, and technology.",
-    alternates: {
-        canonical: "/blog",
-    },
-};
+    description: "Notes by Pranav K on code, craft and the web: tutorials and what I learn building for the web.",
+    path: "/notes",
+    image: "/notes/opengraph-image",
+});
 
 // Enable ISR with 60-second revalidation
 export const revalidate = 60;
