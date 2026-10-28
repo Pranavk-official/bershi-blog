@@ -30,5 +30,13 @@
     "aspect": "9x16",
     "src": "/wallpapers/9x16/Goblin_9x16_2.png",
     "resolution": "Mobile · 9:16"
+  },
+  {
+    "id": "admin-test-9x16-mvsdyquc",
+    "title": "Admin Test",
+    "collection": "Test",
+    "aspect": "9x16",
+    "src": "/wallpapers/9x16/admin-test-9x16-mvsdyquc.webp",
+    "resolution": "Mobile · 9:16"
   }
 ]
