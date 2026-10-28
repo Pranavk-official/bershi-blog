@@ -32,7 +32,7 @@ export default async function AdminPage() {
 
       {!hiddenArtConfigured() && (
         <p role="alert" className="paper p-4 text-sm">
-          Delete and restore are off: set <code>UPSTASH_REDIS_REST_URL</code> and <code>UPSTASH_REDIS_REST_TOKEN</code>.
+          Delete and restore are off: connect a Vercel Blob store (<code>BLOB_READ_WRITE_TOKEN</code>).
         </p>
       )}
 

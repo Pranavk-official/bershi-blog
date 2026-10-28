@@ -53,7 +53,7 @@ export function ArtList({ wallpapers, hidden: initiallyHidden, canHide }: { wall
                 onClick={() => toggle(w, !hidden)}
                 disabled={busy || !canHide}
                 aria-label={`${hidden ? "Restore" : "Delete"} ${w.title}`}
-                title={canHide ? (hidden ? "Restore to the site" : "Delete from the site (can be restored)") : "Set up Redis to hide art"}
+                title={canHide ? (hidden ? "Restore to the site" : "Delete from the site (can be restored)") : "Set up Vercel Blob to hide art"}
                 className="grid size-11 shrink-0 place-items-center text-muted-foreground transition-colors hover:text-foreground disabled:opacity-50"
               >
                 {hidden ? <Eye className="size-4" aria-hidden="true" /> : <EyeOff className="size-4" aria-hidden="true" />}

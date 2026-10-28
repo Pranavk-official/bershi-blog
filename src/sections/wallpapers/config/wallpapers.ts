@@ -12,7 +12,7 @@ export interface Wallpaper {
 }
 
 // The list lives in JSON so an admin upload can rewrite it in a commit.
-// Hidden (soft-deleted) pieces are tracked in Redis: see visibleWallpapers() in lib/hidden-art.ts.
+// Hidden (soft-deleted) pieces are tracked in Vercel Blob: see visibleWallpapers() in lib/hidden-art.ts.
 export const wallpapers = data as Wallpaper[];
 
 /** Path of the JSON file in the repo, for the admin upload. */

@@ -6,6 +6,11 @@ declare module "page-flip" {
     flipNext(): void;
     flipPrev(): void;
     update(): void;
+    /** Instant, no animation. */
+    turnToPage(page: number): void;
+    getCurrentPageIndex(): number;
+    /** Ends a drag as if the pointer were released at `pos` (page-flip's own coordinates). */
+    userStop(pos: { x: number; y: number }, isSwipe?: boolean): void;
     on(event: "flip", callback: (e: { data: number }) => void): this;
     destroy(): void;
   }

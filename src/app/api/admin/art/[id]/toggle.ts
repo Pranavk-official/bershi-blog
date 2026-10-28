@@ -7,7 +7,7 @@ import { hiddenArtConfigured, setHidden } from "@lib/hidden-art";
 export async function toggleHidden(params: Promise<{ id: string }>, hidden: boolean) {
   if (!(await isAdmin())) return NextResponse.json({ error: "Not signed in." }, { status: 401 });
   if (!hiddenArtConfigured()) {
-    return NextResponse.json({ error: "Redis isn't set up (UPSTASH_REDIS_REST_URL / _TOKEN)." }, { status: 500 });
+    return NextResponse.json({ error: "Vercel Blob isn't set up (BLOB_READ_WRITE_TOKEN)." }, { status: 500 });
   }
   const { id } = await params;
   try {
@@ -15,6 +15,6 @@ export async function toggleHidden(params: Promise<{ id: string }>, hidden: bool
     return NextResponse.json({ id, hidden });
   } catch (error) {
     console.error("Art visibility change failed:", error);
-    return NextResponse.json({ error: "Couldn't reach Redis. Try again." }, { status: 502 });
+    return NextResponse.json({ error: "Couldn't reach Vercel Blob. Try again." }, { status: 502 });
   }
 }

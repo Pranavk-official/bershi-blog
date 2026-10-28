@@ -228,12 +228,111 @@ function Sheet({ page, width, photo = false }: { page: Page; width: number; phot
  */
 const MAX_TILT = 2.5; // degrees
 
+// Ragged edge along the binding side of a torn-out page (deterministic, so it doesn't jitter).
+const ragged = (side: "left" | "right") => {
+  const teeth = Array.from({ length: 26 }, (_, i) => {
+    const y = (i / 25) * 100;
+    const depth = 1.2 + ((i * 37) % 7) * 0.45; // 1.2–3.9% of the page width
+    return side === "left" ? `${100 - depth}% ${y}%` : `${depth}% ${y}%`;
+  });
+  return side === "left"
+    ? `polygon(0 0, ${teeth.join(", ")}, 0 100%)`
+    : `polygon(${teeth.join(", ")}, 100% 100%, 100% 0)`;
+};
+
+/** The page coming out of the book, and the blank page it leaves behind while it goes. */
+function TornPage({
+  tear,
+  progress,
+  left,
+  right,
+  width,
+  onDone,
+}: {
+  tear: Tear;
+  progress: number;
+  left: Page;
+  right: Page;
+  width: number;
+  onDone: () => void;
+}) {
+  const sides = tear.region === "spread" ? (["left", "right"] as const) : [tear.region];
+  // Which way it peels: away from the spine, and up or down with the pull.
+  const away = tear.region === "left" ? -1 : 1;
+  const fly = tear.phase === "fly";
+  const back = tear.phase === "back";
+  const p = back ? 0 : progress;
+  const x = fly ? tear.dx * 2.2 + away * 400 : tear.dx * 0.55;
+  const y = fly ? tear.dy * 2.2 - 260 : tear.dy * 0.55;
+  const tilt = fly ? away * 22 : away * p * 9 + tear.dx * 0.02;
+  const box = (side: "left" | "right") => (side === "left" ? "left-0" : "left-1/2");
+  const spanWidth = tear.region === "spread" ? "w-full" : "w-1/2";
+
+  return (
+    <>
+      {/* The blank page under the one being torn out. */}
+      {sides.map((side) => (
+        <div
+          key={side}
+          aria-hidden="true"
+          className={cn("pointer-events-none absolute inset-y-0 z-10 w-1/2", box(side))}
+          style={{ ...photoPaper(side === "left"), opacity: back ? 0 : 1, transition: "opacity 300ms" }}
+        />
+      ))}
+      <div
+        aria-hidden="true"
+        className={cn("pointer-events-none absolute inset-y-0 z-30 flex", spanWidth, tear.region === "right" ? "left-1/2" : "left-0")}
+        style={{
+          transform: `translate(${x}px, ${y}px) rotate(${tilt}deg) scale(${1 + p * 0.03})`,
+          transformOrigin: tear.region === "left" ? "0% 50%" : tear.region === "right" ? "100% 50%" : "50% 100%",
+          transition: tear.phase === "drag" ? "none" : `transform ${fly ? 650 : 350}ms cubic-bezier(0.3, 0.6, 0.25, 1), opacity ${fly ? 650 : 0}ms`,
+          opacity: fly ? 0 : 1,
+          filter: `drop-shadow(0 ${4 + p * 14}px ${6 + p * 16}px rgb(40 28 10 / ${0.15 + p * 0.25}))`,
+        }}
+        onTransitionEnd={(e) => e.propertyName === "transform" && onDone()}
+      >
+        {sides.map((side) => (
+          <div
+            key={side}
+            className="relative h-full flex-1"
+            // A single page tears along the binding; a spread comes out whole.
+            style={{ clipPath: tear.region === "spread" ? undefined : ragged(side) }}
+          >
+            <Sheet page={side === "left" ? left : right} width={width} photo />
+          </div>
+        ))}
+      </div>
+    </>
+  );
+}
+
+type Tear = {
+  plate: Wallpaper;
+  /** Which part of the spread comes out: one page, or both for a piece across the spread. */
+  region: "left" | "right" | "spread";
+  dx: number;
+  dy: number;
+  phase: "drag" | "fly" | "back";
+};
+
+const download = (w: Wallpaper) => {
+  const a = document.createElement("a");
+  a.href = w.src;
+  a.download = "";
+  a.click();
+};
+
 export function ArtBook({ wallpapers }: { wallpapers: Wallpaper[] }) {
   const spreadPages = useMemo(() => buildPages(wallpapers), [wallpapers]);
   const leftOf = (s: number) => spreadPages[s * 2];
   const template = useRef<HTMLDivElement>(null);
   const stage = useRef<HTMLDivElement>(null);
   const book = useRef<PageFlip | null>(null);
+  const pagesBox = useRef<HTMLDivElement>(null);
+  const [tear, setTear] = useState<Tear | null>(null);
+  const tearStart = useRef<{ x: number; y: number; w: number } | null>(null);
+  // A page-flip drag in progress, so pulling it off the book can tear the page out.
+  const press = useRef<{ x: number; y: number; side: "left" | "right"; page: number } | null>(null);
 
   const [current, setCurrent] = useState(0);
   const tiltRef = useRef<HTMLDivElement>(null);
@@ -329,6 +428,70 @@ export function ArtBook({ wallpapers }: { wallpapers: Wallpaper[] }) {
   const plates = leftOf(current)?.plates ?? [];
   const firstPage = current * 2 + 1;
 
+  // Tearing a page out: turn a page as usual, but drag it well off the top or
+  // bottom of the book and it gives way, like paper pulled too hard.
+  const tearProgress = (t: Tear) => Math.min(1, Math.hypot(t.dx, t.dy) / ((tearStart.current?.w ?? 600) * 0.3));
+
+  const startPress = (e: React.PointerEvent<HTMLDivElement>) => {
+    const box = pagesBox.current?.getBoundingClientRect();
+    if (tear || !box || !book.current) return;
+    press.current = {
+      x: e.clientX,
+      y: e.clientY,
+      side: e.clientX < box.left + box.width / 2 ? "left" : "right",
+      page: book.current.getCurrentPageIndex(),
+    };
+  };
+
+  useEffect(() => {
+    const move = (e: PointerEvent) => {
+      const start = tearStart.current;
+      if (tear?.phase === "drag" && start) return setTear({ ...tear, dx: e.clientX - start.x, dy: e.clientY - start.y });
+      const p = press.current;
+      const box = pagesBox.current?.getBoundingClientRect();
+      const flip = book.current;
+      if (!p || !box || !flip || tear) return;
+      const offBook = e.clientY > box.bottom + box.height * 0.12 || e.clientY < box.top - box.height * 0.12;
+      if (!offBook) return;
+      const plate = plates[0]?.aspect === "16x9" ? plates[0] : plates[p.side === "left" ? 0 : 1];
+      if (!plate) return; // a blank page just keeps turning
+      // Let go of page-flip's drag where it started, so it settles back on the spread.
+      const block = stage.current?.querySelector(".stf__block")?.getBoundingClientRect();
+      if (block) flip.userStop({ x: p.x - block.left, y: p.y - block.top });
+      flip.turnToPage(p.page);
+      setCurrent(Math.floor(p.page / 2));
+      press.current = null;
+      tearStart.current = { x: p.x, y: p.y, w: box.width };
+      setTear({ plate, region: plate.aspect === "16x9" ? "spread" : p.side, dx: e.clientX - p.x, dy: e.clientY - p.y, phase: "drag" });
+    };
+    const up = () => {
+      press.current = null;
+      endTear();
+    };
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", up);
+    window.addEventListener("pointercancel", up);
+    return () => {
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", up);
+      window.removeEventListener("pointercancel", up);
+    };
+  });
+
+  const endTear = () => {
+    if (tear?.phase !== "drag") return;
+    if (tearProgress(tear) < 0.55) return setTear({ ...tear, phase: "back" });
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      download(tear.plate);
+      return setTear(null);
+    }
+    setTear({ ...tear, phase: "fly" });
+  };
+  const onTearEnd = () => {
+    if (tear?.phase === "fly") download(tear.plate);
+    if (tear?.phase !== "drag") setTear(null);
+  };
+
   return (
     <div className="flex min-h-[calc(100svh-7rem)] flex-col items-center justify-center pb-8">
       <div className="flex w-full items-center justify-center gap-2 sm:mt-10 sm:gap-6">
@@ -380,6 +543,8 @@ export function ArtBook({ wallpapers }: { wallpapers: Wallpaper[] }) {
                 {/* eslint-disable-next-line @next/next/no-img-element -- fixed decorative backdrop, already sized */}
                 <img src={PHOTO.src} alt="" aria-hidden="true" draggable={false} className="absolute inset-0 size-full select-none" />
                 <div
+                  ref={pagesBox}
+                  onPointerDown={startPress}
                   className="absolute"
                   style={{
                     left: `${(PHOTO.page.x / PHOTO.w) * 100}%`,
@@ -389,6 +554,17 @@ export function ArtBook({ wallpapers }: { wallpapers: Wallpaper[] }) {
                 >
                   {/* Keyed so a layout switch gets a fresh node page-flip hasn't touched. */}
                   <div key={phone ? "phone" : "spread"} ref={stage} />
+
+                  {tear && (
+                    <TornPage
+                      tear={tear}
+                      progress={tearProgress(tear)}
+                      left={spreadPages[current * 2]}
+                      right={spreadPages[current * 2 + 1]}
+                      width={phone ? 1080 : 2048}
+                      onDone={onTearEnd}
+                    />
+                  )}
                 </div>
               </div>
           </div>
@@ -443,7 +619,7 @@ export function ArtBook({ wallpapers }: { wallpapers: Wallpaper[] }) {
       </div>
 
       <p className="mt-4 text-center text-[11px] tracking-[0.3em] text-muted-foreground uppercase">
-        {phone ? "Swipe or tap the page edge to turn" : "Drag, click or use ← → to turn"}
+        {phone ? "Swipe or tap to turn · drag a page off the book to tear it out" : "Drag, click or use ← → to turn · drag a page off the book to tear it out"}
       </p>
       <p className="mt-6 text-center text-xs text-muted-foreground">
         Book inspired by{" "}
