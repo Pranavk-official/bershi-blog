@@ -2,8 +2,8 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { getImageProps } from "next/image";
-import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut } from "lucide-react";
 import type { PageFlip } from "page-flip";
+import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut } from "lucide-react";
 
 import type { Wallpaper } from "@sections/wallpapers/config/wallpapers";
 import { Button } from "@components/ui/button";
@@ -54,14 +54,49 @@ function buildPages(wallpapers: Wallpaper[]): Page[] {
 // sizes the book's wrapper so the whole spread fits the viewport. Phones get
 // taller pages so the open book is as large as a narrow screen allows. On short
 // screens the height term goes negative, so the book keeps a floor width.
+// The desktop book is a photo of a blank open sketchbook (public/book/spread.webp).
+// `page` is where each page's flat surface sits in it, in the photo's pixels;
+// the spread is laid exactly over those two surfaces.
+const PHOTO = { src: "/book/spread.webp", w: 1846, h: 852, page: { x: 76, y: 33, w: 849, h: 717 } };
+
+// Each page surface's outline in the photo, traced from it once (as % of the
+// page box): the dip into the spine at the top, the curve down into the gutter
+// at the bottom, the rounded outer corners. The page-block edges stay outside,
+// so the photo's own edges show around every page, turning ones included.
+const PAGE_CLIP = {
+  left: "polygon(0% 3.49%, 1.18% 2.79%, 2.36% 2.37%, 3.53% 1.81%, 4.71% 1.26%, 5.89% 0.98%, 7.07% 0.84%, 8.24% 0.84%, 9.42% 0.84%, 10.6% 0.84%, 11.78% 0.84%, 12.96% 0.7%, 14.13% 0.7%, 15.31% 0.7%, 16.49% 0.7%, 17.67% 0.7%, 18.85% 0.7%, 20.02% 0.56%, 21.2% 0.56%, 22.38% 0.56%, 23.56% 0.56%, 24.73% 0.56%, 25.91% 0.56%, 27.09% 0.42%, 28.27% 0.42%, 29.45% 0.42%, 30.62% 0.42%, 31.8% 0.42%, 32.98% 0.28%, 34.16% 0.28%, 35.34% 0.28%, 36.51% 0.14%, 37.69% 0.14%, 38.87% 0.14%, 40.05% 0.14%, 41.22% 0.14%, 42.4% 0%, 43.58% 0%, 44.76% 0%, 45.94% 0%, 47.11% 0%, 48.29% -0.14%, 49.47% -0.14%, 50.65% -0.14%, 51.83% -0.14%, 53% -0.28%, 54.18% -0.28%, 55.36% -0.28%, 56.54% -0.28%, 57.71% -0.28%, 58.89% -0.42%, 60.07% -0.42%, 61.25% -0.42%, 62.43% -0.42%, 63.6% -0.42%, 64.78% -0.56%, 65.96% -0.56%, 67.14% -0.56%, 68.32% -0.56%, 69.49% -0.56%, 70.67% -0.56%, 71.85% -0.56%, 73.03% -0.56%, 74.2% -0.56%, 75.38% -0.56%, 76.56% -0.56%, 77.74% -0.56%, 78.92% -0.56%, 80.09% -0.42%, 81.27% -0.42%, 82.45% -0.42%, 83.63% -0.28%, 84.81% -0.28%, 85.98% -0.14%, 87.16% -0.14%, 88.34% 0%, 89.52% 0%, 90.69% 0.14%, 91.87% 0.28%, 93.05% 0.56%, 94.23% 0.7%, 95.41% 0.98%, 96.58% 1.26%, 97.76% 1.53%, 98.94% 1.95%, 99.88% 2.23%, 100% 99.58%, 98.82% 99.58%, 97.64% 99.58%, 96.47% 99.58%, 95.29% 99.58%, 94.11% 99.58%, 92.93% 99.58%, 91.76% 99.58%, 90.58% 99.58%, 89.4% 99.58%, 88.22% 99.58%, 87.04% 99.58%, 85.87% 99.58%, 84.69% 99.58%, 83.51% 99.58%, 82.33% 99.58%, 81.15% 99.58%, 79.98% 99.58%, 78.8% 99.58%, 77.62% 99.58%, 76.44% 99.58%, 75.27% 99.58%, 74.09% 99.58%, 72.91% 99.58%, 71.73% 99.58%, 70.55% 99.58%, 69.38% 99.58%, 68.2% 99.58%, 67.02% 99.58%, 65.84% 99.58%, 64.66% 99.58%, 63.49% 99.58%, 62.31% 99.58%, 61.13% 99.58%, 59.95% 99.58%, 58.78% 99.58%, 57.6% 99.58%, 56.42% 99.58%, 55.24% 99.58%, 54.06% 99.58%, 52.89% 99.58%, 51.71% 99.58%, 50.53% 99.58%, 49.35% 99.58%, 48.17% 99.58%, 47% 99.58%, 45.82% 99.58%, 44.64% 99.58%, 43.46% 99.58%, 42.29% 99.58%, 41.11% 99.58%, 39.93% 99.58%, 38.75% 99.58%, 37.57% 99.58%, 36.4% 99.58%, 35.22% 99.58%, 34.04% 99.58%, 32.86% 99.58%, 31.68% 99.58%, 30.51% 99.58%, 29.33% 99.58%, 28.15% 99.58%, 26.97% 99.58%, 25.8% 99.58%, 24.62% 99.58%, 23.44% 99.58%, 22.26% 99.58%, 21.08% 99.58%, 19.91% 99.58%, 18.73% 99.58%, 17.55% 99.58%, 16.37% 99.58%, 15.19% 99.58%, 14.02% 99.58%, 12.84% 99.58%, 11.66% 99.58%, 10.48% 99.58%, 9.31% 99.58%, 8.13% 99.58%, 6.95% 99.58%, 5.77% 99.58%, 4.59% 99.58%, 3.42% 99.58%, 2.24% 99.58%, 1.06% 99.58%, 0.12% 99.58%)",
+  right: "polygon(0% 2.37%, 1.18% 2.09%, 2.36% 1.67%, 3.53% 1.39%, 4.71% 1.12%, 5.89% 0.84%, 7.07% 0.7%, 8.24% 0.56%, 9.42% 0.42%, 10.6% 0.28%, 11.78% 0.14%, 12.96% 0.14%, 14.13% 0%, 15.31% 0%, 16.49% -0.14%, 17.67% -0.14%, 18.85% -0.14%, 20.02% -0.28%, 21.2% -0.28%, 22.38% -0.28%, 23.56% -0.28%, 24.73% -0.28%, 25.91% -0.28%, 27.09% -0.28%, 28.27% -0.28%, 29.45% -0.28%, 30.62% -0.28%, 31.8% -0.28%, 32.98% -0.28%, 34.16% -0.28%, 35.34% -0.14%, 36.51% -0.14%, 37.69% -0.14%, 38.87% -0.14%, 40.05% -0.14%, 41.22% -0.14%, 42.4% -0.14%, 43.58% -0.14%, 44.76% 0%, 45.94% 0%, 47.11% 0%, 48.29% 0%, 49.47% 0%, 50.65% 0.14%, 51.83% 0.14%, 53% 0.14%, 54.18% 0.14%, 55.36% 0.14%, 56.54% 0.28%, 57.71% 0.28%, 58.89% 0.28%, 60.07% 0.28%, 61.25% 0.42%, 62.43% 0.42%, 63.6% 0.42%, 64.78% 0.42%, 65.96% 0.56%, 67.14% 0.56%, 68.32% 0.56%, 69.49% 0.56%, 70.67% 0.56%, 71.85% 0.56%, 73.03% 0.7%, 74.2% 0.7%, 75.38% 0.7%, 76.56% 0.7%, 77.74% 0.84%, 78.92% 0.84%, 80.09% 0.84%, 81.27% 0.84%, 82.45% 0.84%, 83.63% 0.98%, 84.81% 0.98%, 85.98% 0.98%, 87.16% 0.98%, 88.34% 1.12%, 89.52% 1.12%, 90.69% 1.12%, 91.87% 1.12%, 93.05% 1.12%, 94.23% 1.26%, 95.41% 1.26%, 96.58% 1.53%, 97.76% 2.09%, 98.94% 2.65%, 99.88% 2.93%, 99.88% 99.58%, 98.94% 99.58%, 97.76% 99.58%, 96.58% 99.58%, 95.41% 99.58%, 94.23% 99.58%, 93.05% 99.58%, 91.87% 99.58%, 90.69% 99.58%, 89.52% 99.58%, 88.34% 99.58%, 87.16% 99.58%, 85.98% 99.58%, 84.81% 99.58%, 83.63% 99.58%, 82.45% 99.58%, 81.27% 99.58%, 80.09% 99.58%, 78.92% 99.58%, 77.74% 99.58%, 76.56% 99.58%, 75.38% 99.58%, 74.2% 99.58%, 73.03% 99.58%, 71.85% 99.58%, 70.67% 99.58%, 69.49% 99.58%, 68.32% 99.58%, 67.14% 99.58%, 65.96% 99.58%, 64.78% 99.58%, 63.6% 99.58%, 62.43% 99.58%, 61.25% 99.58%, 60.07% 99.58%, 58.89% 99.58%, 57.71% 99.58%, 56.54% 99.58%, 55.36% 99.58%, 54.18% 99.58%, 53% 99.58%, 51.83% 99.58%, 50.65% 99.58%, 49.47% 99.58%, 48.29% 99.58%, 47.11% 99.58%, 45.94% 99.58%, 44.76% 99.58%, 43.58% 99.58%, 42.4% 99.58%, 41.22% 99.58%, 40.05% 99.58%, 38.87% 99.58%, 37.69% 99.58%, 36.51% 99.58%, 35.34% 99.58%, 34.16% 99.58%, 32.98% 99.58%, 31.8% 99.58%, 30.62% 99.58%, 29.45% 99.58%, 28.27% 99.58%, 27.09% 99.58%, 25.91% 99.58%, 24.73% 99.58%, 23.56% 99.58%, 22.38% 99.58%, 21.2% 99.58%, 20.02% 99.58%, 18.85% 99.58%, 17.67% 99.58%, 16.49% 99.58%, 15.31% 99.58%, 14.13% 99.58%, 12.96% 99.58%, 11.78% 99.58%, 10.6% 99.58%, 9.42% 99.58%, 8.24% 99.58%, 7.07% 99.58%, 5.89% 99.58%, 4.71% 99.58%, 3.53% 99.58%, 2.36% 99.58%, 1.18% 99.58%, 0% 99.58%)",
+};
+
+/**
+ * This page's patch of the photo as its paper, clipped to the page surface's
+ * real outline: the sheet *is* the photographed paper and keeps that shape
+ * while it turns.
+ */
+const photoPaper = (left: boolean): React.CSSProperties => {
+  const { w, h, page } = PHOTO;
+  const x = left ? page.x : page.x + page.w;
+  const size = `${(w / page.w) * 100}% ${(h / page.h) * 100}%`;
+  const position = `${(x / (w - page.w)) * 100}% ${(page.y / (h - page.h)) * 100}%`;
+  return {
+    backgroundImage: `url(${PHOTO.src})`,
+    backgroundSize: size,
+    backgroundPosition: position,
+    clipPath: PAGE_CLIP[left ? "left" : "right"],
+  };
+};
+
+// page-flip's page size: the ratio of one page surface in the photo.
+const PAGE_SIZE = { width: 600, height: Math.round((600 * PHOTO.page.h) / PHOTO.page.w) };
+
 const layouts = {
   spread: {
-    page: { width: 600, height: 520 },
-    fit: `max(min(100%, 20rem), min(100%, 900px, (100svh - 24rem) * ${1200 / 520}))`,
+    // Sizes the whole photo, page block and all.
+    fit: `max(min(100%, 20rem), min(100%, 1180px, (100svh - 17rem) * ${PHOTO.w / PHOTO.h}))`,
   },
+  // Phones get the same book, edge to edge, as on Meng To's sketchbook.
   phone: {
-    page: { width: 360, height: 500 },
-    fit: `max(min(100%, 20rem), min(100%, (100svh - 22rem) * ${720 / 500}))`,
+    fit: "100vw",
   },
 };
 
@@ -75,26 +110,27 @@ const imageUrl = (w: Wallpaper, width: number) =>
 
 // Cold-press paper: fine grain plus coarser tooth, laid over the art too.
 // Each sheet is its own GPU layer (transform-gpu) and avoids blend modes and
-// filters: page-flip re-clips pages every frame, so paint must stay cheap.
+// filters: pages repaint every frame of a turn, so paint must stay cheap.
 const PAPER = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .42 0 0 0 0 .36 0 0 0 0 .27 0 0 0 .22 0'/%3E%3C/filter%3E%3Cfilter id='t'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.035' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .43 0 0 0 0 .32 0 0 0 .18 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23t)'/%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E")`;
 
 const PAPER_INK = "#f8f3ea";
 
 /** One sheet of paper. */
-function Sheet({ page, width, layer = true }: { page: Page; width: number; layer?: boolean }) {
+function Sheet({ page, width, photo = false }: { page: Page; width: number; photo?: boolean }) {
   const { art, side } = page;
   const left = side === "left";
 
   return (
     <div
       className={cn(
-        "relative h-full w-full overflow-hidden bg-[#f8f3ea]",
-        // Own GPU layer for page-flip; off inside PhoneBook's 3D leaf, where a
-        // nested layer defeats backface-visibility in Chrome.
-        layer && "transform-gpu",
+        "relative h-full w-full overflow-hidden",
+        !photo && "bg-[#f8f3ea]",
+        // Own GPU layer for page-flip.
+        "transform-gpu",
         left ? "rounded-l-[10px]" : "rounded-r-[10px]",
         "@container",
       )}
+      style={photo ? photoPaper(left) : undefined}
     >
       {art?.fit === "half" && (
         // Each half holds a double-width copy of the piece, cover-fitted and
@@ -103,11 +139,16 @@ function Sheet({ page, width, layer = true }: { page: Page; width: number; layer
         <div
           className={cn(
             "absolute top-[9%] bottom-[9%] overflow-hidden",
+            // Ink the art into the paper: its light ground takes the paper's colour and tooth.
+            photo && "mix-blend-multiply",
             left ? "right-0 left-[6%]" : "right-[6%] left-0",
           )}
           style={{
             // Soft outer edges so the piece sits in the paper like a wash.
-            maskImage: `linear-gradient(to bottom, transparent, #000 6%, #000 94%, transparent), linear-gradient(to ${left ? "right" : "left"}, transparent, #000 5%)`,
+            // On the photo book the fade is wider, so the ground dissolves into the page.
+            maskImage: photo
+              ? `linear-gradient(to bottom, transparent, #000 22%, #000 80%, transparent), linear-gradient(to ${left ? "right" : "left"}, transparent, #000 18%)`
+              : `linear-gradient(to bottom, transparent, #000 6%, #000 94%, transparent), linear-gradient(to ${left ? "right" : "left"}, transparent, #000 5%)`,
             maskComposite: "intersect",
           }}
         >
@@ -119,8 +160,19 @@ function Sheet({ page, width, layer = true }: { page: Page; width: number; layer
       )}
       {art?.fit === "whole" && (
         <div
-          className="absolute inset-[8%] bg-contain bg-center bg-no-repeat"
-          style={{ backgroundImage: `url(${imageUrl(art.plate, width)})` }}
+          className={cn(
+            "absolute bg-contain bg-center bg-no-repeat",
+            // On the photo book the box is the image's own shape, so the edge fades land on the art.
+            photo ? "top-[8%] bottom-[8%] left-1/2 aspect-9/16 -translate-x-1/2 mix-blend-multiply" : "inset-[8%]",
+          )}
+          style={{
+            backgroundImage: `url(${imageUrl(art.plate, width)})`,
+            ...(photo && {
+              // The tall pieces hold their figures low, so the empty ground above fades out.
+              maskImage: "linear-gradient(to bottom, transparent 8%, #000 55%, #000 90%, transparent), linear-gradient(to right, transparent, #000 15%, #000 85%, transparent)",
+              maskComposite: "intersect",
+            }),
+          }}
         />
       )}
       {/* Folio: a seal pressed at the outer foot of the page. */}
@@ -150,16 +202,17 @@ function Sheet({ page, width, layer = true }: { page: Page; width: number; layer
           <path d="M93 66q-3 3-1 7l3-1z" />
         </g>
       </svg>
-      {/* Paper tooth over everything, so the art reads as printed on it. */}
+      {/* Paper tooth over everything, so the art reads as printed on it. The
+          photo has its own tooth and gutter, so it gets a lighter touch. */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0"
+        className={cn("pointer-events-none absolute inset-0", photo && "opacity-40")}
         style={{ backgroundImage: PAPER }}
       />
       {/* Crease: the sheet curves down into the spine, over the art. */}
       <div
         aria-hidden="true"
-        className={cn("pointer-events-none absolute inset-y-0 w-[14%]", left ? "right-0" : "left-0")}
+        className={cn("pointer-events-none absolute inset-y-0 w-[14%]", left ? "right-0" : "left-0", photo && "opacity-50")}
         style={{
           background: `linear-gradient(to ${left ? "left" : "right"}, rgb(40 28 12 / 0.38), rgb(40 28 12 / 0.16) 10%, rgb(255 255 255 / 0.10) 32%, rgb(40 28 12 / 0.04) 55%, transparent)`,
         }}
@@ -168,153 +221,13 @@ function Sheet({ page, width, layer = true }: { page: Page; width: number; layer
   );
 }
 
-const TURN_MS = 620;
-
 /**
- * Phone book: the same open spreads as desktop, turned with a CSS 3D hinge
- * (page-flip's turns stutter on phones). The leaf is the right page of the
- * lower spread; its back is the next spread's left page, so it lands on the
- * left like a real leaf. Drag to turn (it follows the finger), or tap the
- * right / left half.
+ * Sketchbook: the photographed book with the art laid on its pages, turned by
+ * `page-flip`'s curl. page-flip moves and finally removes the nodes it owns,
+ * so React renders the pages into a hidden template and the library gets clones.
  */
-function PhoneBook({ pages, onChange }: { pages: Page[]; onChange: (spread: number) => void }) {
-  const spreadCount = pages.length / 2;
-  const leftOf = (s: number) => pages[s * 2];
-  const rightOf = (s: number) => pages[s * 2 + 1];
-  const [spread, setSpread] = useState(0);
-  // dir 1 = forward, -1 = back. p is how far the turn has gone, 0 → 1.
-  const [turn, setTurn] = useState<{ dir: 1 | -1; p: number; dragging: boolean } | null>(null);
-  const drag = useRef<{ x: number; t: number; w: number; dx: number } | null>(null);
-  const reduce = useRef(false);
+const MAX_TILT = 2.5; // degrees
 
-  useEffect(() => {
-    reduce.current = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  }, []);
-
-  const canTurn = (dir: 1 | -1) => !turn && spread + dir >= 0 && spread + dir < spreadCount;
-
-  const finish = (dir: 1 | -1, done: boolean) => {
-    if (done) {
-      setSpread(spread + dir);
-      onChange(spread + dir);
-    }
-    setTurn(null);
-  };
-
-  const settle = (dir: 1 | -1, done: boolean) => {
-    if (reduce.current) return finish(dir, done);
-    setTurn({ dir, p: done ? 1 : 0, dragging: false });
-  };
-
-  const tapTurn = (dir: 1 | -1) => {
-    if (!canTurn(dir)) return;
-    // Mount the leaf at rest, then animate it on the next frame.
-    setTurn({ dir, p: 0, dragging: true });
-    requestAnimationFrame(() => requestAnimationFrame(() => settle(dir, true)));
-  };
-
-  const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (turn) return;
-    drag.current = { x: e.clientX, t: e.timeStamp, w: e.currentTarget.offsetWidth, dx: 0 };
-  };
-
-  const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    const d = drag.current;
-    if (!d) return;
-    d.dx = e.clientX - d.x;
-    const dir: 1 | -1 = d.dx < 0 ? 1 : -1;
-    if (!turn) {
-      if (Math.abs(d.dx) < 8 || !canTurn(dir)) return;
-      e.currentTarget.setPointerCapture(e.pointerId);
-    } else if (!turn.dragging || turn.dir !== dir) return;
-    // A full-width drag carries the leaf all the way over.
-    setTurn({ dir, p: Math.min(1, Math.abs(d.dx) / d.w), dragging: true });
-  };
-
-  const onPointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
-    const d = drag.current;
-    drag.current = null;
-    if (!d) return;
-    if (turn?.dragging) {
-      // Commit past a third of the way, or on a quick flick.
-      const speed = Math.abs(d.dx) / Math.max(1, e.timeStamp - d.t);
-      settle(turn.dir, turn.p > 0.33 || speed > 0.5);
-    } else if (Math.abs(d.dx) < 8) {
-      const x = e.clientX - e.currentTarget.getBoundingClientRect().left;
-      tapTurn(x > d.w / 2 ? 1 : -1);
-    }
-  };
-
-  // The leaf hinges between spreads `a` and `a + 1`: front = right page of
-  // `a`, back = left page of `a + 1`. Beneath it: left of `a`, right of `a + 1`.
-  const a = turn?.dir === -1 ? spread - 1 : spread;
-  // 0° lying on the right, -180° turned over onto the left.
-  const angle = turn ? -180 * (turn.dir === 1 ? turn.p : 1 - turn.p) : 0;
-  const lift = Math.sin((-angle / 180) * Math.PI);
-  const ease = turn?.dragging ? "none" : `transform ${TURN_MS}ms cubic-bezier(0.3, 0.6, 0.25, 1)`;
-
-  return (
-    <div
-      onPointerDown={onPointerDown}
-      onPointerMove={onPointerMove}
-      onPointerUp={onPointerUp}
-      onPointerCancel={onPointerUp}
-      className="relative flex w-full touch-pan-y select-none [perspective:2200px]"
-      style={{ aspectRatio: `${2 * layouts.phone.page.width} / ${layouts.phone.page.height}` }}
-    >
-      <div className="relative h-full flex-1">
-        <Sheet page={leftOf(turn ? a : spread)} width={1080} />
-        {/* Shade on the left page as the leaf comes down onto it. */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_left,rgb(40_28_12/0.4),transparent_75%)]"
-          style={{ opacity: turn && angle < -90 ? lift * 0.7 : 0 }}
-        />
-      </div>
-      <div className="relative h-full flex-1">
-        <Sheet page={rightOf(turn ? a + 1 : spread)} width={1080} />
-        {/* Shadow the lifted leaf casts on the right page. */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgb(40_28_12/0.4),transparent_75%)]"
-          style={{ opacity: turn && angle > -90 ? lift * 0.7 : 0 }}
-        />
-
-        {turn && (
-          <div
-            className="absolute inset-0 origin-left [transform-style:preserve-3d]"
-            style={{ transform: `rotateY(${angle}deg)`, transition: ease }}
-            onTransitionEnd={(e) => e.propertyName === "transform" && finish(turn.dir, turn.p === 1)}
-          >
-            <div className="absolute inset-0 [backface-visibility:hidden]">
-              <Sheet page={rightOf(a)} width={1080} layer={false} />
-              {/* Light falls off as the leaf rises. */}
-              <div
-                aria-hidden="true"
-                className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_left,rgb(40_28_12/0.3),transparent)]"
-                style={{ opacity: lift }}
-              />
-            </div>
-            <div className="absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)]">
-              <Sheet page={leftOf(a + 1)} width={1080} layer={false} />
-              <div
-                aria-hidden="true"
-                className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgb(40_28_12/0.3),transparent)]"
-                style={{ opacity: lift }}
-              />
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-/**
- * Sketchbook. Desktop is an open spread turned by `page-flip`, which moves
- * and finally removes the nodes it owns, so React renders those pages into a
- * hidden template and the library gets clones. Phones get PhoneBook.
- */
 export function ArtBook({ wallpapers }: { wallpapers: Wallpaper[] }) {
   const spreadPages = useMemo(() => buildPages(wallpapers), [wallpapers]);
   const leftOf = (s: number) => spreadPages[s * 2];
@@ -323,12 +236,30 @@ export function ArtBook({ wallpapers }: { wallpapers: Wallpaper[] }) {
   const book = useRef<PageFlip | null>(null);
 
   const [current, setCurrent] = useState(0);
+  const tiltRef = useRef<HTMLDivElement>(null);
+  const pressed = useRef(false);
+
+  // The book leans a little toward a fine pointer, like a sketchbook picked up off the desk.
+  const tilt = (e: React.PointerEvent<HTMLDivElement>) => {
+    const el = tiltRef.current;
+    if (!el || e.pointerType !== "mouse" || pressed.current) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const r = el.getBoundingClientRect();
+    const x = Math.max(-1, Math.min(1, ((e.clientX - r.left) / r.width) * 2 - 1));
+    const y = Math.max(-1, Math.min(1, ((e.clientY - r.top) / r.height) * 2 - 1));
+    el.style.setProperty("--ry", `${(x * MAX_TILT).toFixed(2)}deg`);
+    el.style.setProperty("--rx", `${(-y * MAX_TILT * 0.8).toFixed(2)}deg`);
+  };
+  const untilt = () => {
+    tiltRef.current?.style.setProperty("--ry", "0deg");
+    tiltRef.current?.style.setProperty("--rx", "0deg");
+  };
   const [zoom, setZoom] = useState(0);
   // null until mounted: the layout depends on the viewport.
   const [phone, setPhone] = useState<boolean | null>(null);
 
   useEffect(() => {
-    // Landscape phones too: wide but short, and page-flip stutters on phones.
+    // Landscape phones too: wide but short.
     const query = window.matchMedia("(max-width: 640px), (pointer: coarse) and (max-height: 500px)");
     const sync = () => setPhone(query.matches);
     sync();
@@ -338,9 +269,9 @@ export function ArtBook({ wallpapers }: { wallpapers: Wallpaper[] }) {
 
   const layout = phone ? layouts.phone : layouts.spread;
 
-  // Build the page-flip spread on larger screens.
+  // Build the page-flip book once the layout is known, and again if it changes.
   useEffect(() => {
-    if (phone !== false) return;
+    if (phone === null) return;
     let flip: PageFlip | undefined;
     let cancelled = false;
     setCurrent(0);
@@ -349,25 +280,25 @@ export function ArtBook({ wallpapers }: { wallpapers: Wallpaper[] }) {
       if (cancelled || !template.current || !stage.current) return;
       const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       flip = new PageFlip(stage.current, {
-        ...layouts.spread.page,
+        ...PAGE_SIZE,
         size: "stretch",
-        minWidth: 150,
+        minWidth: 100,
         maxWidth: 3000,
-        minHeight: 130,
+        minHeight: 80,
         maxHeight: 2600,
-        // Always an open spread: desktop pieces run across both pages.
+        // Always an open spread, on phones too: desktop pieces run across both pages.
         usePortrait: false,
         showCover: false,
         maxShadowOpacity: 0.35,
         flippingTime: reduce ? 1 : 900,
+        // Vertical swipes still scroll the page on touch screens.
         mobileScrollSupport: true,
-        // No corner fold on hover; pages turn on drag, tap or the arrows.
+        // No corner fold on hover; pages turn on drag, tap, the arrows or the keys.
         showPageCorners: false,
       });
-      flip.loadFromHTML(
-        Array.from(template.current.children, (node) => node.cloneNode(true)) as HTMLElement[],
-      );
-      flip.on("flip", (e) => setCurrent(e.data));
+      flip.loadFromHTML(Array.from(template.current.children, (node) => node.cloneNode(true)) as HTMLElement[]);
+      // page-flip reports a page index; the rest of the page works in spreads.
+      flip.on("flip", (e) => setCurrent(Math.floor((e.data as number) / 2)));
       book.current = flip;
     });
 
@@ -383,9 +314,20 @@ export function ArtBook({ wallpapers }: { wallpapers: Wallpaper[] }) {
     book.current?.update();
   }, [zoom]);
 
-  // `current` is a page index on desktop (page-flip) and a spread on phones.
-  const plates = (phone ? leftOf(current) : spreadPages[current])?.plates ?? [];
-  const firstPage = (phone ? current * 2 : current - (current % 2)) + 1;
+  // Arrow keys turn the page, unless focus is in a field.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.target as HTMLElement).closest("input, textarea, select, [contenteditable]")) return;
+      if (e.key === "ArrowRight") book.current?.flipNext();
+      else if (e.key === "ArrowLeft") book.current?.flipPrev();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  // `current` is the open spread.
+  const plates = leftOf(current)?.plates ?? [];
+  const firstPage = current * 2 + 1;
 
   return (
     <div className="flex min-h-[calc(100svh-7rem)] flex-col items-center justify-center pb-8">
@@ -399,11 +341,25 @@ export function ArtBook({ wallpapers }: { wallpapers: Wallpaper[] }) {
           <ChevronLeft className="size-9" strokeWidth={0.8} />
         </button>
 
-        <div className={cn("min-w-0 flex-1", ZOOMS[zoom] > 1 && "overflow-x-auto")}>
-          {/* page-flip forces the stage to width:100%, so size this wrapper. */}
+        <div
+          className={cn("min-w-0 flex-1 [perspective:1750px]", ZOOMS[zoom] > 1 && "overflow-x-auto")}
+          onPointerMove={tilt}
+          onPointerLeave={untilt}
+          // Hold still while a page is dragged, so page-flip's pointer maths stay exact.
+          onPointerDown={() => {
+            pressed.current = true;
+            untilt();
+          }}
+          onPointerUp={() => (pressed.current = false)}
+        >
           <div
-            className="relative isolate mx-auto"
-            style={{ width: `calc(${layout.fit} * ${ZOOMS[zoom]})` }}
+            ref={tiltRef}
+            className="relative isolate mx-auto transition-transform duration-500 ease-out [transform:rotateX(var(--rx,0deg))_rotateY(var(--ry,0deg))] motion-reduce:transition-none"
+            style={{
+              width: `calc(${layout.fit} * ${ZOOMS[zoom]})`,
+              // Full-bleed on phones: break out of the page's side padding.
+              ...(phone ? { marginInline: "calc(50% - 50vw)" } : {}),
+            }}
           >
             {/* Soft shadow pooled on the desk under the book. */}
             <div
@@ -414,12 +370,27 @@ export function ArtBook({ wallpapers }: { wallpapers: Wallpaper[] }) {
               aria-hidden="true"
               className="absolute -z-10 inset-x-[9%] top-[62%] -bottom-[2%] bg-[radial-gradient(50%_44%_at_50%_42%,rgb(44_32_14/0.4),rgb(44_32_14/0.17)_48%,transparent_78%)]"
             />
-            {phone ? (
-              <PhoneBook pages={spreadPages} onChange={setCurrent} />
-            ) : (
-              // Keyed so a layout switch gets a fresh node page-flip hasn't touched.
-              <div key="spread" ref={stage} />
-            )}
+            {/* Hairline contact shadow where the page block meets the desk. */}
+            <div
+              aria-hidden="true"
+              className="absolute -z-10 inset-x-[3%] -bottom-[3%] h-[6%] bg-[radial-gradient(50%_50%_at_50%_30%,rgb(40_28_10/0.3),transparent_76%)] blur-[3px]"
+            />
+            {/* The photographed book, with the spread laid over its two page surfaces. */}
+            <div className="relative" style={{ aspectRatio: `${PHOTO.w} / ${PHOTO.h}` }}>
+                {/* eslint-disable-next-line @next/next/no-img-element -- fixed decorative backdrop, already sized */}
+                <img src={PHOTO.src} alt="" aria-hidden="true" draggable={false} className="absolute inset-0 size-full select-none" />
+                <div
+                  className="absolute"
+                  style={{
+                    left: `${(PHOTO.page.x / PHOTO.w) * 100}%`,
+                    top: `${(PHOTO.page.y / PHOTO.h) * 100}%`,
+                    width: `${((PHOTO.page.w * 2) / PHOTO.w) * 100}%`,
+                  }}
+                >
+                  {/* Keyed so a layout switch gets a fresh node page-flip hasn't touched. */}
+                  <div key={phone ? "phone" : "spread"} ref={stage} />
+                </div>
+              </div>
           </div>
         </div>
 
@@ -433,7 +404,7 @@ export function ArtBook({ wallpapers }: { wallpapers: Wallpaper[] }) {
         </button>
       </div>
 
-      <p className="mt-4 text-center text-[11px] tracking-[0.3em] text-muted-foreground uppercase">
+      <p className="mt-7 text-center text-[11px] tracking-[0.3em] text-muted-foreground uppercase">
         Pages {firstPage}–{firstPage + 1} of {spreadPages.length}
       </p>
       <p aria-live="polite" className="mt-3 min-h-5 text-center text-[13px] tracking-[0.3em] uppercase">
@@ -472,7 +443,7 @@ export function ArtBook({ wallpapers }: { wallpapers: Wallpaper[] }) {
       </div>
 
       <p className="mt-4 text-center text-[11px] tracking-[0.3em] text-muted-foreground uppercase">
-        {phone ? "Swipe or tap the page edge to turn" : "Drag the page to turn"}
+        {phone ? "Swipe or tap the page edge to turn" : "Drag, click or use ← → to turn"}
       </p>
       <p className="mt-6 text-center text-xs text-muted-foreground">
         Book inspired by{" "}
@@ -491,13 +462,14 @@ export function ArtBook({ wallpapers }: { wallpapers: Wallpaper[] }) {
 
       {/* Page template, cloned into the book on mount. */}
       <div ref={template} hidden>
-        {phone === false &&
+        {phone !== null &&
           spreadPages.map((p) => (
             <div key={p.key}>
-              <Sheet page={p} width={2048} />
+              <Sheet page={p} width={phone ? 1080 : 2048} photo />
             </div>
           ))}
       </div>
+
     </div>
   );
 }
